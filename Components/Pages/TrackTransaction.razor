@@ -4,46 +4,88 @@
 
 <h3>Track Transaction</h3>
 
-<EditForm Model="@transactionModel" OnValidSubmit="HandleTransactionSubmit">
+<EditForm Model="@transactionModel" OnValidSubmit="HandleFormSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
+
     <div class="form-group">
         <label for="type">Type:</label>
         <select id="type" class="form-control" @oninput="HandleTransactionTypeChange" required>
             <option value="Income" selected>Income</option>
             <option value="Expense">Expense</option>
+            <option value="Debt">Debt</option>
         </select>
     </div>
 
-    <div class="form-group">
-        <label for="source">Category:</label>
-        <select id="source" class="form-control" @bind="transactionModel.TransactionSource" required>
-            @foreach (var category in categories)
-            {
-                <option value="@category">@category</option>
-            }
-        </select>
-        <ValidationMessage For="() => transactionModel.TransactionSource" />
-    </div>
+    @if (transactionModel.TransactionType == "Debt")
+    {
+        <!-- Debt-specific fields -->
+        <div class="form-group">
+            <label for="debt-category">Category:</label>
+            <select id="debt-category" class="form-control" @bind="debtModel.DebtCategory" required>
+                <option value="Personal">Personal</option>
+                <option value="Institutional">Institutional</option>
+            </select>
+        </div>
 
-    <div class="form-group">
-        <label for="date">Date:</label>
-        <input type="date" id="date" class="form-control" @bind="transactionModel.TransactionDate" required />
-    </div>
+        <div class="form-group">
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" class="form-control" @bind="debtModel.DebtAmount" step="0.01" required />
+            <ValidationMessage For="() => debtModel.DebtAmount" />
+        </div>
 
-    <div class="form-group">
-        <label for="amount">Amount:</label>
-        <input type="number" id="amount" class="form-control" @bind="transactionModel.TransactionAmount" step="0.01" required />
-        <ValidationMessage For="() => transactionModel.TransactionAmount" />
+        <div class="form-group">
+            <label for="debt-date">Debt Date:</label>
+            <input type="date" id="debt-date" class="form-control" @bind="debtModel.DebtDate" required />
+        </div>
 
-    </div>
+        <div class="form-group">
+            <label for="due-date">Due Date:</label>
+            <input type="date" id="due-date" class="form-control" @bind="debtModel.DebtDueDate" required />
+        </div>
 
-    <div class="form-group">
-        <label for="remarks">Remarks:</label>
-        <textarea id="remarks" class="form-control" @bind="transactionModel.Remarks"></textarea>
-    </div>
+        <div class="form-group">
+            <label for="source">Source:</label>
+            <input type="text" id="source" class="form-control" @bind="debtModel.DebtSource" required />
+        </div>
 
-    <button type="submit" class="btn btn-primary">Save Transaction</button>
+        <div class="form-group">
+            <label for="remarks">Remarks:</label>
+            <textarea id="remarks" class="form-control" @bind="debtModel.DebtRemarks"></textarea>
+        </div>
+    }
+    else
+    {
+        <!-- General transaction fields -->
+        <div class="form-group">
+            <label for="source">Category:</label>
+            <select id="source" class="form-control" @bind="transactionModel.TransactionSource" required>
+                @foreach (var category in categories)
+                {
+                    <option value="@category">@category</option>
+                }
+            </select>
+            <ValidationMessage For="() => transactionModel.TransactionSource" />
+        </div>
+
+        <div class="form-group">
+            <label for="date">Date:</label>
+            <input type="date" id="date" class="form-control" @bind="transactionModel.TransactionDate" required />
+        </div>
+
+        <div class="form-group">
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" class="form-control" @bind="transactionModel.TransactionAmount" step="0.01" required />
+            <ValidationMessage For="() => transactionModel.TransactionAmount" />
+        </div>
+
+        <div class="form-group">
+            <label for="remarks">Remarks:</label>
+            <textarea id="remarks" class="form-control" @bind="transactionModel.Remarks"></textarea>
+        </div>
+    }
+
+    <button type="submit" class="btn btn-primary">Save</button>
 </EditForm>
 
 @if (successMessage != null)
@@ -56,84 +98,123 @@
 }
 
 @code {
-    private List<string> categories = new List<string> { "Salary", "Allowances", "Interests", "Returns", "Other" }; // Default categories
+    private List<string> categories = new List<string> { "Salary", "Allowances", "Interests", "Returns", "Other" };
+    private FineTrack.Database.Transaction transactionModel = new FineTrack.Database.Transaction
+        {
+            TransactionDate = DateTime.Now,
+            TransactionType = "Income",
+            TransactionSource = "Salary"
+        };
+
+    private FineTrack.Database.Debt debtModel = new FineTrack.Database.Debt
+        {
+            DebtDate = DateTime.Now,
+            DebtDueDate = DateTime.Now.AddDays(30),
+            DebtCategory = "Personal",
+            DebtAmount = 0.01M
+        };
+
+    private string successMessage;
+    private string errorMessage;
+
     protected override async Task OnInitializedAsync()
     {
-        categories.AddRange(BalanceService.IncomeCategories);  // Add Income categories from BalanceService
+        categories.AddRange(BalanceService.IncomeCategories);
     }
+
     private void HandleTransactionTypeChange(ChangeEventArgs e)
     {
         var selectedType = e.Value.ToString();
         transactionModel.TransactionType = selectedType;
 
-        // Define the categories based on the selected transaction type
         if (selectedType == "Income")
         {
-            // Start with predefined income categories and add categories from BalanceService
             categories = new List<string> { "Salary", "Allowances", "Interests", "Returns", "Other" };
-            categories.AddRange(BalanceService.IncomeCategories);  // Add Income categories from BalanceService
+            categories.AddRange(BalanceService.IncomeCategories);
+        }
+        else if (selectedType == "Expense")
+        {
+            categories = new List<string> { "Grocery", "Shopping", "Outing", "Returns", "Other" };
+            categories.AddRange(BalanceService.ExpenseCategories);
+        }
+    }
+
+    private async Task HandleFormSubmit()
+    {
+        if (transactionModel.TransactionType == "Debt")
+        {
+            if (debtModel.DebtAmount <= 0)
+            {
+                errorMessage = "Debt amount must be greater than 0.";
+                return;
+            }
+
+            if (debtModel.DebtDueDate < debtModel.DebtDate)
+            {
+                errorMessage = "Due Date cannot be earlier than Debt Date.";
+                return;
+            }
+
+            if (debtModel.DebtSource == null)
+            {
+                errorMessage = "There needs to be a source.";
+                return;
+            }
+
+            debtModel.DebtStatus = "Pending";
+
+            try
+            {
+                await DbContext.CreateAsync(debtModel);
+                successMessage = "Debt added successfully!";
+                errorMessage = null;
+                debtModel = new FineTrack.Database.Debt
+                    {
+                        DebtDate = DateTime.Now,
+                        DebtDueDate = DateTime.Now.AddDays(30),
+                        DebtCategory = "Personal",
+                        DebtAmount = 0.01M
+                    };
+            }
+            catch (Exception ex)
+            {
+                errorMessage = "An error occurred while adding the debt: " + ex.Message;
+                successMessage = null;
+            }
         }
         else
         {
-            // Start with predefined expense categories and add categories from BalanceService
-            categories = new List<string> { "Grocery", "Shopping", "Outing", "Returns", "Other" };
-            categories.AddRange(BalanceService.ExpenseCategories);  // Add Expense categories from BalanceService
-        }
-
-        // Reset the selected category to the first one
-        transactionModel.TransactionSource = categories.FirstOrDefault();
-    }
-    private FineTrack.Database.Transaction transactionModel = new FineTrack.Database.Transaction
-    {
-        TransactionDate = DateTime.Now, // Default to today's date
-        TransactionType = "Income", // Default value
-        TransactionSource = "Salary" // Default value
-    };
-
-    private string successMessage;
-    private string errorMessage;
-    // private decimal availableBalance = @BalanceService.AvailableBalance;
-
-    private async Task HandleTransactionSubmit()
-    {
-        // Validation: Amount cannot be 0.00
-        if (transactionModel.TransactionAmount <= 0)
-        {
-            errorMessage = "Amount must be greater than 0.";
-            return;
-        }
-        if (transactionModel.TransactionType == "Expense" && transactionModel.TransactionAmount > @BalanceService.AvailableBalance)
-        {
-            errorMessage = "Insufficient balance for outflow transaction";
-            return;
-            // if (transactionModel.TransactionAmount > @BalanceService.AvailableBalance)
-            // {
-            //     return;
-            // }
-            
-        }
-        
-        try
-        {
-            // Insert the transaction into the database
-            await DbContext.CreateAsync(transactionModel);
-            await BalanceService.UpdateAvailableBalanceAsync(); // Refresh balance after saving transaction
-            successMessage = "Transaction added successfully!";
-            errorMessage = null;
-
-            // Clear the form
-            transactionModel = new FineTrack.Database.Transaction
+            // Handle general transactions
+            try
             {
-                TransactionType = "Income",
-                TransactionSource = "Salary",
-                TransactionDate = DateTime.Now
-            };
-        }
-        catch (Exception ex)
-        {
-            errorMessage = "An error occurred while adding the transaction: " + ex.Message;
-            successMessage = null;
+                if (transactionModel.TransactionAmount <= 0)
+                {
+                    errorMessage = "Amount must be greater than 0.";
+                    return;
+                }
+                if (transactionModel.TransactionType == "Expense" && transactionModel.TransactionAmount > BalanceService.AvailableBalance)
+                {
+                    errorMessage = "Insufficient balance for expense.";
+                    return;
+                }
+
+                await DbContext.CreateAsync(transactionModel);
+                await BalanceService.UpdateAvailableBalanceAsync();
+                successMessage = "Transaction added successfully!";
+                errorMessage = null;
+
+                transactionModel = new FineTrack.Database.Transaction
+                    {
+                        TransactionDate = DateTime.Now,
+                        TransactionType = "Income",
+                        TransactionSource = "Salary"
+                    };
+            }
+            catch (Exception ex)
+            {
+                errorMessage = "An error occurred while adding the transaction: " + ex.Message;
+                successMessage = null;
+            }
         }
     }
 }
-

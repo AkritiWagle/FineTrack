@@ -26,6 +26,7 @@ namespace FineTrack.Services
         public async Task UpdateAvailableBalanceAsync()
         {
             var transactions = await _dbContext.Transactions.ToListAsync();
+            var Debts = await _dbContext.Debts.ToListAsync();
             // Calculate AvailableBalance using the formula
             var totalIncome = transactions
                 .Where(t => t.TransactionType == "Income")
@@ -35,8 +36,16 @@ namespace FineTrack.Services
                 .Where(t => t.TransactionType == "Expense")
                 .Sum(t => t.TransactionAmount);
 
+            var totalPendingDebt = Debts
+                .Where(t => t.DebtStatus == "Pending")
+                .Sum(t => t.DebtAmount);
+
+            var totalClearedDebt = Debts
+                .Where(t => t.DebtStatus == "Cleared")
+                .Sum(t => t.DebtAmount);
+
             var debt = 0; // Replace with actual debt calculation when available
-            AvailableBalance = totalIncome + debt - totalExpense;
+            AvailableBalance = totalIncome + totalPendingDebt - totalExpense;
         }
 
         // Method to update the categories
