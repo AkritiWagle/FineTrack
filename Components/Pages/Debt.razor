@@ -4,6 +4,7 @@
 
 <h3>Debts</h3>
 <p>Total Debt Transactions: @BalanceService.DebtTransactionCount</p>
+<p>Available Balance: @BalanceService.AvailableBalance.ToString("C")</p>
 
 @if (Debts == null)
 {
@@ -18,6 +19,7 @@ else
         <table class="table table-bordered">
             <thead>
                 <tr>
+                    <th>Select</th>
                     <th>ID</th>
                     <th>Amount</th>
                     <th>Category</th>
@@ -41,25 +43,39 @@ else
             <tbody>
             @foreach (var debt in Debts)
             {
-                        <tr>
-                            <td>@debt.DebtId</td>
-                            <td>@debt.DebtAmount.ToString("C")</td>
-                            <td>@debt.DebtCategory</td>
-                            <td>@debt.DebtStatus</td>
-                            <td>@debt.DebtDueDate.ToString("yyyy-MM-dd")</td>
-                            <td>@debt.DebtSource</td>
-                            <td>@debt.DebtDate.ToString("yyyy-MM-dd")</td>
-                            <td>@debt.DebtRemarks</td>
-                        </tr>
+                    <tr>
+                        <td>
+                            <input type="radio" name="selectedDebt" @onclick="() => SelectDebt(debt)" />
+                        </td>
+                        <td>@debt.DebtId</td>
+                        <td>@debt.DebtAmount.ToString("C")</td>
+                        <td>@debt.DebtCategory</td>
+                        <td>@debt.DebtStatus</td>
+                        <td>@debt.DebtDueDate.ToString("yyyy-MM-dd")</td>
+                        <td>@debt.DebtSource</td>
+                        <td>@debt.DebtDate.ToString("yyyy-MM-dd")</td>
+                        <td>@debt.DebtRemarks</td>
+                    </tr>
             }
             </tbody>
         </table>
+}
+
+<button class="btn btn-primary" @onclick="ClearSelectedDebt" disabled="@(selectedDebt == null || selectedDebt.DebtStatus != "Pending")">
+    Clear Selected Debt
+</button>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+        <div class="alert alert-danger mt-3">@errorMessage</div>
 }
 
 @code {
     private List<FineTrack.Database.Debt> Debts;
     private bool isSortingByDueDateAscending = true;
     private bool isSortingByDebtDateAscending = true;
+    private FineTrack.Database.Debt selectedDebt; // Holds the currently selected debt
+    private string errorMessage; // Holds any error messages
 
     protected override async Task OnInitializedAsync()
     {
@@ -108,6 +124,41 @@ else
         else
         {
             Debts = Debts.OrderByDescending(d => d.DebtDate).ToList();
+        }
+    }
+
+    private void SelectDebt(FineTrack.Database.Debt debt)
+    {
+        selectedDebt = debt;
+        errorMessage = string.Empty; // Clear any previous error messages
+    }
+
+    private async Task ClearSelectedDebt()
+    {
+        if (selectedDebt == null || selectedDebt.DebtStatus != "Pending")
+        {
+            errorMessage = "No pending debt selected.";
+            return;
+        }
+
+        if (selectedDebt.DebtAmount > BalanceService.AvailableBalance)
+        {
+            errorMessage = "Insufficient balance to clear the debt.";
+            return;
+        }
+
+        // Update the debt status to "Cleared"
+        selectedDebt.DebtStatus = "Cleared";
+
+        try
+        {
+            await DbContext.UpdateAsync(selectedDebt); // Update the database
+            await BalanceService.UpdateAvailableBalanceAsync();
+            errorMessage = string.Empty; // Clear error message
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to clear the debt: {ex.Message}";
         }
     }
 }
