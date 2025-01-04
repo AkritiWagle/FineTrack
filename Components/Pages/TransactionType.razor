@@ -1,8 +1,9 @@
 ﻿@page "/TransactionType"
 @using FineTrack.Database
 @inject ApplicationDbContext DbContext
+@inject FineTrack.Services.BalanceService BalanceService
 
-<h3>Manage Transaction Categories</h3>
+<h3>Manage Custom Transaction Categories</h3>
 
 <div>
     <label for="transactionType">Type:</label>
@@ -83,6 +84,7 @@
             await DbContext.CreateAsync(category);
             newCategory = string.Empty;
             await LoadCategories();
+            await BalanceService.UpdateTransactionCategoriesAsync();
         }
         else
         {
@@ -95,6 +97,7 @@
     {
         await DbContext.DeleteAsync(category);
         await LoadCategories();
+        await BalanceService.UpdateTransactionCategoriesAsync();
     }
 
     private async Task OnTypeChanged(ChangeEventArgs e)

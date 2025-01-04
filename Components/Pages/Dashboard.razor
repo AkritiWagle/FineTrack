@@ -7,12 +7,33 @@
 This is our Dashboard
 <p>Available Balance: @BalanceService.AvailableBalance</p>
 
+@if (BalanceService.IncomeCategories.Any())
+{
+    <h3>Income Categories</h3>
+    <ul>
+        @foreach (var category in BalanceService.IncomeCategories)
+        {
+            <li>@category</li>
+        }
+    </ul>
+}
 
+@if (BalanceService.ExpenseCategories.Any())
+{
+    <h3>Expense Categories</h3>
+    <ul>
+        @foreach (var category in BalanceService.ExpenseCategories)
+        {
+            <li>@category</li>
+        }
+    </ul>
+}
 @code 
 {
 	protected override async Task OnInitializedAsync()
 	{
 		await BalanceService.UpdateAvailableBalanceAsync();
+		await BalanceService.UpdateTransactionCategoriesAsync();
 
 	}
 

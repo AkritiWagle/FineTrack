@@ -13,6 +13,10 @@ namespace FineTrack.Services
         private readonly ApplicationDbContext _dbContext;
 
         public decimal AvailableBalance { get; private set; } = 0;
+        // Exposed categories as properties
+        public List<string> IncomeCategories { get; private set; } = new List<string>();
+        public List<string> ExpenseCategories { get; private set; } = new List<string>();
+
 
         public BalanceService(ApplicationDbContext dbContext)
         {
@@ -33,6 +37,29 @@ namespace FineTrack.Services
 
             var debt = 0; // Replace with actual debt calculation when available
             AvailableBalance = totalIncome + debt - totalExpense;
+        }
+
+        // Method to update the categories
+        public async Task UpdateTransactionCategoriesAsync()
+        {
+            var categories = await _dbContext.TransactionCategories.ToListAsync();
+
+            // Clear existing categories before adding new ones
+            IncomeCategories.Clear();
+            ExpenseCategories.Clear();
+
+            // Separate categories based on their type
+            foreach (var category in categories)
+            {
+                if (category.TypeOfTransaction == "Income")
+                {
+                    IncomeCategories.Add(category.TransactionCategory);
+                }
+                else if (category.TypeOfTransaction == "Expense")
+                {
+                    ExpenseCategories.Add(category.TransactionCategory);
+                }
+            }
         }
     }
 }

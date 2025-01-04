@@ -9,8 +9,8 @@
     <ValidationSummary />
     <div class="form-group">
         <label for="type">Type:</label>
-        <select id="type" class="form-control" @bind="transactionModel.TransactionType" required>
-            <option value="Income">Income</option> 
+        <select id="type" class="form-control" @oninput="HandleTransactionTypeChange" required>
+            <option value="Income" selected>Income</option>
             <option value="Expense">Expense</option>
         </select>
     </div>
@@ -18,10 +18,10 @@
     <div class="form-group">
         <label for="source">Category:</label>
         <select id="source" class="form-control" @bind="transactionModel.TransactionSource" required>
-            <option value="Salary">Salary</option>
-            <option value="Rent">Rent</option>
-            <option value="Food">Food</option>
-            <!-- Add more categories as needed -->
+            @foreach (var category in categories)
+            {
+                <option value="@category">@category</option>
+            }
         </select>
         <ValidationMessage For="() => transactionModel.TransactionSource" />
     </div>
@@ -56,6 +56,33 @@
 }
 
 @code {
+    private List<string> categories = new List<string> { "Salary", "Allowances", "Interests", "Returns", "Other" }; // Default categories
+    protected override async Task OnInitializedAsync()
+    {
+        categories.AddRange(BalanceService.IncomeCategories);  // Add Income categories from BalanceService
+    }
+    private void HandleTransactionTypeChange(ChangeEventArgs e)
+    {
+        var selectedType = e.Value.ToString();
+        transactionModel.TransactionType = selectedType;
+
+        // Define the categories based on the selected transaction type
+        if (selectedType == "Income")
+        {
+            // Start with predefined income categories and add categories from BalanceService
+            categories = new List<string> { "Salary", "Allowances", "Interests", "Returns", "Other" };
+            categories.AddRange(BalanceService.IncomeCategories);  // Add Income categories from BalanceService
+        }
+        else
+        {
+            // Start with predefined expense categories and add categories from BalanceService
+            categories = new List<string> { "Grocery", "Shopping", "Outing", "Returns", "Other" };
+            categories.AddRange(BalanceService.ExpenseCategories);  // Add Expense categories from BalanceService
+        }
+
+        // Reset the selected category to the first one
+        transactionModel.TransactionSource = categories.FirstOrDefault();
+    }
     private FineTrack.Database.Transaction transactionModel = new FineTrack.Database.Transaction
     {
         TransactionDate = DateTime.Now, // Default to today's date

@@ -92,6 +92,9 @@ namespace FineTrack.Database
         // Add a property to access the Transaction table
         public AsyncTableQuery<Transaction> Transactions => _dbConnection.Table<Transaction>();
 
+        // Add a property to access the TransactionCategoryTable table
+        public AsyncTableQuery<TransactionCategoryTable> TransactionCategories => _dbConnection.Table<TransactionCategoryTable>();
+
 
     }
 }
