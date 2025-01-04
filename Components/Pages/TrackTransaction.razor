@@ -1,5 +1,112 @@
 ﻿@page "/TrackTransaction"
+@inject FineTrack.Database.ApplicationDbContext DbContext
+@inject FineTrack.Services.BalanceService BalanceService
 
-<h1>Track Transaction page</h1>
+<h3>Track Transaction</h3>
 
-This is our page for tracking the transaction
+<EditForm Model="@transactionModel" OnValidSubmit="HandleTransactionSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="form-group">
+        <label for="type">Type:</label>
+        <select id="type" class="form-control" @bind="transactionModel.TransactionType" required>
+            <option value="Income">Income</option> 
+            <option value="Expense">Expense</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="source">Category:</label>
+        <select id="source" class="form-control" @bind="transactionModel.TransactionSource" required>
+            <option value="Salary">Salary</option>
+            <option value="Rent">Rent</option>
+            <option value="Food">Food</option>
+            <!-- Add more categories as needed -->
+        </select>
+        <ValidationMessage For="() => transactionModel.TransactionSource" />
+    </div>
+
+    <div class="form-group">
+        <label for="date">Date:</label>
+        <input type="date" id="date" class="form-control" @bind="transactionModel.TransactionDate" required />
+    </div>
+
+    <div class="form-group">
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount" class="form-control" @bind="transactionModel.TransactionAmount" step="0.01" required />
+        <ValidationMessage For="() => transactionModel.TransactionAmount" />
+
+    </div>
+
+    <div class="form-group">
+        <label for="remarks">Remarks:</label>
+        <textarea id="remarks" class="form-control" @bind="transactionModel.Remarks"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Transaction</button>
+</EditForm>
+
+@if (successMessage != null)
+{
+    <div class="alert alert-success mt-3">@successMessage</div>
+}
+@if (errorMessage != null)
+{
+    <div class="alert alert-danger mt-3">@errorMessage</div>
+}
+
+@code {
+    private FineTrack.Database.Transaction transactionModel = new FineTrack.Database.Transaction
+    {
+        TransactionDate = DateTime.Now, // Default to today's date
+        TransactionType = "Income", // Default value
+        TransactionSource = "Salary" // Default value
+    };
+
+    private string successMessage;
+    private string errorMessage;
+    // private decimal availableBalance = @BalanceService.AvailableBalance;
+
+    private async Task HandleTransactionSubmit()
+    {
+        // Validation: Amount cannot be 0.00
+        if (transactionModel.TransactionAmount <= 0)
+        {
+            errorMessage = "Amount must be greater than 0.";
+            return;
+        }
+        if (transactionModel.TransactionType == "Expense" && transactionModel.TransactionAmount > @BalanceService.AvailableBalance)
+        {
+            errorMessage = "Insufficient balance for outflow transaction";
+            return;
+            // if (transactionModel.TransactionAmount > @BalanceService.AvailableBalance)
+            // {
+            //     return;
+            // }
+            
+        }
+        
+        try
+        {
+            // Insert the transaction into the database
+            await DbContext.CreateAsync(transactionModel);
+            await BalanceService.UpdateAvailableBalanceAsync(); // Refresh balance after saving transaction
+            successMessage = "Transaction added successfully!";
+            errorMessage = null;
+
+            // Clear the form
+            transactionModel = new FineTrack.Database.Transaction
+            {
+                TransactionType = "Income",
+                TransactionSource = "Salary",
+                TransactionDate = DateTime.Now
+            };
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "An error occurred while adding the transaction: " + ex.Message;
+            successMessage = null;
+        }
+    }
+}
+

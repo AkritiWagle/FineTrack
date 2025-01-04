@@ -1,5 +1,59 @@
 ﻿@page "/Transaction"
 
-<h1>Transaction page</h1>
+@inject FineTrack.Database.ApplicationDbContext DbContext
 
-This is our transaction page
+<h3>Transactions</h3>
+
+@if (transactions == null)
+{
+        <p>Loading...</p>
+}
+else if (transactions.Count == 0)
+{
+        <p>No transactions found.</p>
+}
+else
+{
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>TransactionID</th>
+                    <th>Transaction Type</th>
+                    <th>Amount</th>
+                    <th>Category</th>
+                    <th>Transaction Date</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var transaction in transactions)
+            {
+                        <tr>
+                            <td>@transaction.TransactionId</td>
+                            <td>@transaction.TransactionType</td>
+                            <td>@transaction.TransactionAmount.ToString("C")</td>
+                            <td>@transaction.TransactionSource</td>
+                            <td>@transaction.TransactionDate.ToString("yyyy-MM-dd")</td>
+                            <td>@transaction.Remarks</td>
+                        </tr>
+            }
+            </tbody>
+        </table>
+}
+
+@code {
+    private List<FineTrack.Database.Transaction> transactions;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            transactions = await DbContext.ReadAllAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading transactions: {ex.Message}");
+            transactions = new List<FineTrack.Database.Transaction>();
+        }
+    }
+}

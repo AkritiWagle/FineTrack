@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using FineTrack.Database;
+using FineTrack.Services;
+using Microsoft.Extensions.Logging;
 
 namespace FineTrack
 {
@@ -16,8 +18,11 @@ namespace FineTrack
 
             builder.Services.AddMauiBlazorWebView();
 
+            builder.Services.AddSingleton<ApplicationDbContext>();
+            builder.Services.AddScoped<BalanceService>();
+
 #if DEBUG
-    		builder.Services.AddBlazorWebViewDeveloperTools();
+            builder.Services.AddBlazorWebViewDeveloperTools();
     		builder.Logging.AddDebug();
 #endif
 
