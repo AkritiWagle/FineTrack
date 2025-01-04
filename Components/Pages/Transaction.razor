@@ -1,8 +1,9 @@
 ﻿@page "/Transaction"
 
 @inject FineTrack.Database.ApplicationDbContext DbContext
+@inject FineTrack.Services.BalanceService BalanceService
 
-<h3>Transactions</h3>
+<h3>Transactions</h3> Total Inflow/Outflow Transactions : @BalanceService.TransactionCount
 
 @if (transactions == null)
 {

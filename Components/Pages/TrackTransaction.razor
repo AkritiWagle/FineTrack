@@ -6,8 +6,6 @@
 
 <EditForm Model="@transactionModel" OnValidSubmit="HandleFormSubmit">
     <DataAnnotationsValidator />
-    <ValidationSummary />
-
     <div class="form-group">
         <label for="type">Type:</label>
         <select id="type" class="form-control" @oninput="HandleTransactionTypeChange" required>
@@ -166,6 +164,7 @@
             try
             {
                 await DbContext.CreateAsync(debtModel);
+                await BalanceService.UpdateAvailableBalanceAsync();
                 successMessage = "Debt added successfully!";
                 errorMessage = null;
                 debtModel = new FineTrack.Database.Debt

@@ -1,7 +1,10 @@
 ﻿@page "/Debt"
 @inject FineTrack.Database.ApplicationDbContext DbContext
+@inject FineTrack.Services.BalanceService BalanceService
 
-<h3>Debts</h3>
+
+<h3>Debts</h3> Total Debt Transactions : @BalanceService.DebtTransactionCount
+
 
 @if (Debts == null)
 {

@@ -1,6 +1,11 @@
 ﻿using FineTrack.Database;
 using FineTrack.Services;
 using Microsoft.Extensions.Logging;
+using Blazorise;
+using Blazorise.Bootstrap5;
+using ChartJs.Blazor;
+using MudBlazor;
+using MudBlazor.Services;
 
 namespace FineTrack
 {
