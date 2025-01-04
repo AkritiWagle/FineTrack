@@ -13,6 +13,11 @@ namespace FineTrack.Services
         private readonly ApplicationDbContext _dbContext;
 
         public decimal AvailableBalance { get; private set; } = 0;
+        public decimal TotalInflows { get; private set; } = 0;
+        public decimal TotalOutflows { get; private set; } = 0;
+        public decimal TotalDebt { get; private set; } = 0;
+        public decimal TotalPendingDebt { get; private set; } = 0;
+        public decimal TotalClearedDebt { get; private set; } = 0;
         // Exposed categories as properties
         public List<string> IncomeCategories { get; private set; } = new List<string>();
         public List<string> ExpenseCategories { get; private set; } = new List<string>();
@@ -32,18 +37,26 @@ namespace FineTrack.Services
                 .Where(t => t.TransactionType == "Income")
                 .Sum(t => t.TransactionAmount);
 
+            TotalInflows = totalIncome;
+
             var totalExpense = transactions
                 .Where(t => t.TransactionType == "Expense")
                 .Sum(t => t.TransactionAmount);
+
+            TotalOutflows = totalExpense;
 
             var totalPendingDebt = Debts
                 .Where(t => t.DebtStatus == "Pending")
                 .Sum(t => t.DebtAmount);
 
+            TotalPendingDebt = totalPendingDebt;
+
             var totalClearedDebt = Debts
                 .Where(t => t.DebtStatus == "Cleared")
                 .Sum(t => t.DebtAmount);
 
+            TotalClearedDebt = totalClearedDebt;
+            TotalDebt = TotalPendingDebt + TotalClearedDebt;
             var debt = 0; // Replace with actual debt calculation when available
             AvailableBalance = totalIncome + totalPendingDebt - totalExpense;
         }
