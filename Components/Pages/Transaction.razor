@@ -3,7 +3,8 @@
 @inject FineTrack.Database.ApplicationDbContext DbContext
 @inject FineTrack.Services.BalanceService BalanceService
 
-<h3>Transactions</h3> Total Inflow/Outflow Transactions : @BalanceService.TransactionCount
+<h3>Transactions</h3>
+<p>Total Inflow/Outflow Transactions: @BalanceService.TransactionCount</p>
 
 @if (transactions == null)
 {
@@ -20,23 +21,33 @@ else
                 <tr>
                     <th>TransactionID</th>
                     <th>Transaction Type</th>
-                    <th>Amount</th>
+                    <th>
+                        Amount
+                        <button class="btn btn-link btn-sm" @onclick="ToggleSortByAmount">
+                        @((isSortingByAmountAscending ? "↑" : "↓"))
+                        </button>
+                    </th>
                     <th>Category</th>
-                    <th>Transaction Date</th>
+                    <th>
+                        Transaction Date
+                        <button class="btn btn-link btn-sm" @onclick="ToggleSortByDate">
+                        @((isSortingByDateAscending ? "↑" : "↓"))
+                        </button>
+                    </th>
                     <th>Remarks</th>
                 </tr>
             </thead>
             <tbody>
             @foreach (var transaction in transactions)
             {
-                        <tr>
-                            <td>@transaction.TransactionId</td>
-                            <td>@transaction.TransactionType</td>
-                            <td>@transaction.TransactionAmount.ToString("C")</td>
-                            <td>@transaction.TransactionSource</td>
-                            <td>@transaction.TransactionDate.ToString("yyyy-MM-dd")</td>
-                            <td>@transaction.Remarks</td>
-                        </tr>
+                    <tr>
+                        <td>@transaction.TransactionId</td>
+                        <td>@transaction.TransactionType</td>
+                        <td>@transaction.TransactionAmount.ToString("C")</td>
+                        <td>@transaction.TransactionSource</td>
+                        <td>@transaction.TransactionDate.ToString("yyyy-MM-dd")</td>
+                        <td>@transaction.Remarks</td>
+                    </tr>
             }
             </tbody>
         </table>
@@ -44,17 +55,56 @@ else
 
 @code {
     private List<FineTrack.Database.Transaction> transactions;
+    private bool isSortingByDateAscending = true; // Toggle for date sort order
+    private bool isSortingByAmountAscending = true; // Toggle for amount sort order
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             transactions = await DbContext.ReadAllAsync();
+            SortByDate(); // Default initial sort by date
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error loading transactions: {ex.Message}");
             transactions = new List<FineTrack.Database.Transaction>();
+        }
+    }
+
+    private void ToggleSortByDate()
+    {
+        isSortingByDateAscending = !isSortingByDateAscending; // Toggle sort order for date
+        SortByDate();
+    }
+
+    private void SortByDate()
+    {
+        if (isSortingByDateAscending)
+        {
+            transactions = transactions.OrderBy(t => t.TransactionDate).ToList();
+        }
+        else
+        {
+            transactions = transactions.OrderByDescending(t => t.TransactionDate).ToList();
+        }
+    }
+
+    private void ToggleSortByAmount()
+    {
+        isSortingByAmountAscending = !isSortingByAmountAscending; // Toggle sort order for amount
+        SortByAmount();
+    }
+
+    private void SortByAmount()
+    {
+        if (isSortingByAmountAscending)
+        {
+            transactions = transactions.OrderBy(t => t.TransactionAmount).ToList();
+        }
+        else
+        {
+            transactions = transactions.OrderByDescending(t => t.TransactionAmount).ToList();
         }
     }
 }
