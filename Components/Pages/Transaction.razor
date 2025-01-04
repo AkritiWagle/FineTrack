@@ -6,33 +6,42 @@
 <h3>Transactions</h3>
 <p>Total Inflow/Outflow Transactions: @BalanceService.TransactionCount</p>
 
-<!-- Filter Section -->
-<div class="mb-3">
-    <h5>Filter Transactions</h5>
-    <div class="row">
-        <div class="col-md-3">
-            <label for="transactionType" class="form-label">Transaction Type</label>
-            <select id="transactionType" class="form-select" @bind="filterTransactionType">
-                <option value="">-- Select --</option>
-                <option value="Income">Income</option>
-                <option value="Expense">Expense</option>
+<div class="filters mb-4">
+    <h5>Filters</h5>
+    <div class="d-flex align-items-end">
+        <div class="form-group mr-3">
+            <label for="transactionType">Transaction Type:</label>
+            <select id="transactionType" class="form-control" @bind="filterTransactionType">
+                <option value="">-- All --</option>
+                @foreach (var type in transactionTypes)
+                {
+                        <option value="@type">@type</option>
+                }
             </select>
         </div>
-        <div class="col-md-3">
-            <label for="category" class="form-label">Category</label>
-            <input type="text" id="category" class="form-control" @bind="filterCategory" placeholder="Enter category" />
+        <div class="form-group mr-3">
+            <label for="category">Category:</label>
+            <select id="category" class="form-control" @bind="filterCategory">
+                <option value="">-- All --</option>
+                @foreach (var category in transactionCategories)
+                {
+                        <option value="@category">@category</option>
+                }
+            </select>
         </div>
-        <div class="col-md-3">
-            <label for="startDate" class="form-label">Start Date</label>
-            <input type="date" id="startDate" class="form-control" @bind="filterStartDate" />
+        <div class="form-group mr-3">
+            <label for="startDate">Start Date:</label>
+            <input id="startDate" type="date" @bind="filterStartDate" class="form-control" />
         </div>
-        <div class="col-md-3">
-            <label for="endDate" class="form-label">End Date</label>
-            <input type="date" id="endDate" class="form-control" @bind="filterEndDate" />
+        <div class="form-group mr-3">
+            <label for="endDate">End Date:</label>
+            <input id="endDate" type="date" @bind="filterEndDate" class="form-control" />
+        </div>
+        <div>
+            <button class="btn btn-primary mr-2" @onclick="ApplyFiltersAndSort">Apply Filters</button>
+            <button class="btn btn-secondary" @onclick="ClearFilters">Clear Filters</button>
         </div>
     </div>
-    <button class="btn btn-primary mt-3" @onclick="ApplyFilters">Apply Filters</button>
-    <button class="btn btn-secondary mt-3 ms-2" @onclick="ClearFilters">Clear Filters</button>
 </div>
 
 @if (filteredTransactions == null)
@@ -41,7 +50,7 @@
 }
 else if (filteredTransactions.Count == 0)
 {
-        <p>No transactions found based on the applied filters.</p>
+        <p>No transactions found.</p>
 }
 else
 {
@@ -50,23 +59,33 @@ else
                 <tr>
                     <th>TransactionID</th>
                     <th>Transaction Type</th>
-                    <th>Amount</th>
+                    <th>
+                        Amount
+                        <button class="btn btn-link btn-sm" @onclick="ToggleAmountSortOrder">
+                        @((isAmountSortAscending ? "↑" : "↓"))
+                        </button>
+                    </th>
                     <th>Category</th>
-                    <th>Transaction Date</th>
+                    <th>
+                        Transaction Date
+                        <button class="btn btn-link btn-sm" @onclick="ToggleDateSortOrder">
+                        @((isDateSortAscending ? "↑" : "↓"))
+                        </button>
+                    </th>
                     <th>Remarks</th>
                 </tr>
             </thead>
             <tbody>
             @foreach (var transaction in filteredTransactions)
             {
-                    <tr>
-                        <td>@transaction.TransactionId</td>
-                        <td>@transaction.TransactionType</td>
-                        <td>@transaction.TransactionAmount.ToString("C")</td>
-                        <td>@transaction.TransactionSource</td>
-                        <td>@transaction.TransactionDate.ToString("yyyy-MM-dd")</td>
-                        <td>@transaction.Remarks</td>
-                    </tr>
+                        <tr>
+                            <td>@transaction.TransactionId</td>
+                            <td>@transaction.TransactionType</td>
+                            <td>@transaction.TransactionAmount.ToString("C")</td>
+                            <td>@transaction.TransactionSource</td>
+                            <td>@transaction.TransactionDate.ToString("yyyy-MM-dd")</td>
+                            <td>@transaction.Remarks</td>
+                        </tr>
             }
             </tbody>
         </table>
@@ -76,18 +95,36 @@ else
     private List<FineTrack.Database.Transaction> transactions;
     private List<FineTrack.Database.Transaction> filteredTransactions;
 
-    // Filter Criteria
-    private string filterTransactionType = string.Empty;
-    private string filterCategory = string.Empty;
+    private List<string> transactionTypes = new List<string>();
+    private List<string> transactionCategories = new List<string>();
+
+    private string filterTransactionType;
+    private string filterCategory;
     private DateTime? filterStartDate;
     private DateTime? filterEndDate;
+
+    private bool isDateSortAscending = true;
+    private bool isAmountSortAscending = true;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             transactions = await DbContext.ReadAllAsync();
-            filteredTransactions = new List<FineTrack.Database.Transaction>(transactions); // Initialize filtered list
+            filteredTransactions = transactions; // Initialize filtered list
+
+            // Populate dropdowns
+            transactionTypes = transactions
+                .Where(t => !string.IsNullOrEmpty(t.TransactionType))
+                .Select(t => t.TransactionType)
+                .Distinct()
+                .ToList();
+
+            transactionCategories = transactions
+                .Where(t => !string.IsNullOrEmpty(t.TransactionSource))
+                .Select(t => t.TransactionSource)
+                .Distinct()
+                .ToList();
         }
         catch (Exception ex)
         {
@@ -97,8 +134,9 @@ else
         }
     }
 
-    private void ApplyFilters()
+    private void ApplyFiltersAndSort()
     {
+        // Apply Filters
         filteredTransactions = transactions
             .Where(t => string.IsNullOrEmpty(filterTransactionType) ||
                         (!string.IsNullOrEmpty(t.TransactionType) &&
@@ -109,14 +147,56 @@ else
             .Where(t => !filterStartDate.HasValue || t.TransactionDate >= filterStartDate.Value)
             .Where(t => !filterEndDate.HasValue || t.TransactionDate <= filterEndDate.Value)
             .ToList();
+
+        // Apply Sorting
+        SortTransactionsByDate(); // Default sorting
     }
 
     private void ClearFilters()
     {
+        // Reset filters
         filterTransactionType = string.Empty;
         filterCategory = string.Empty;
         filterStartDate = null;
         filterEndDate = null;
-        filteredTransactions = new List<FineTrack.Database.Transaction>(transactions); // Reset to original list
+
+        // Reset filtered list to all transactions
+        filteredTransactions = transactions;
+    }
+
+    private void ToggleDateSortOrder()
+    {
+        isDateSortAscending = !isDateSortAscending; // Toggle sorting order
+        SortTransactionsByDate();
+    }
+
+    private void ToggleAmountSortOrder()
+    {
+        isAmountSortAscending = !isAmountSortAscending; // Toggle sorting order
+        SortTransactionsByAmount();
+    }
+
+    private void SortTransactionsByDate()
+    {
+        if (isDateSortAscending)
+        {
+            filteredTransactions = filteredTransactions.OrderBy(t => t.TransactionDate).ToList();
+        }
+        else
+        {
+            filteredTransactions = filteredTransactions.OrderByDescending(t => t.TransactionDate).ToList();
+        }
+    }
+
+    private void SortTransactionsByAmount()
+    {
+        if (isAmountSortAscending)
+        {
+            filteredTransactions = filteredTransactions.OrderBy(t => t.TransactionAmount).ToList();
+        }
+        else
+        {
+            filteredTransactions = filteredTransactions.OrderByDescending(t => t.TransactionAmount).ToList();
+        }
     }
 }
