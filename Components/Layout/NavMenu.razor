@@ -1,5 +1,9 @@
 ﻿<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span>
+    </div>
+
+    <div class="container-fluid">
         <a class="navbar-brand" href="">FineTrack</a>
     </div>
 </div>
@@ -8,9 +12,34 @@
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="flex-column">
+        @* <div class="nav-item px-3"> *@
+        @*     <NavLink class="nav-link" href="" Match="NavLinkMatch.All"> *@
+        @*         <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home *@
+        @*     </NavLink> *@
+        @* </div> *@
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Dashboard
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="Transaction" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Transaction
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="TrackTransaction" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Track Transaction
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="TransactionType" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Transaction Type
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="Debt" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Debt
             </NavLink>
         </div>
         <div class="nav-item px-3">
