@@ -33,7 +33,7 @@ namespace FineTrack.Database
             {
                 _dbConnection = new SQLiteAsyncConnection(databasePath, Flags);
                 _dbConnection.CreateTableAsync<Transaction>();
-                _dbConnection.CreateTableAsync<TransactionType>();
+                _dbConnection.CreateTableAsync<TransactionCategoryTable>();
 
             }
         }

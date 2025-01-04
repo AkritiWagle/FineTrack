@@ -1,5 +1,105 @@
 ﻿@page "/TransactionType"
+@using FineTrack.Database
+@inject ApplicationDbContext DbContext
 
-<h1>Transaction Type / Category page</h1>
+<h3>Manage Transaction Categories</h3>
 
-This is our page for managing transaction type or category
+<div>
+    <label for="transactionType">Type:</label>
+    <select id="transactionType" value="@selectedType" @onchange="OnTypeChanged">
+        <option value="Income">Income</option>
+        <option value="Expense">Expense</option>
+    </select>
+    <input type="text" @bind="newCategory" placeholder="Enter Category Name" />
+    <button @onclick="AddCategory">Add</button>
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <p style="color: red;">@errorMessage</p>
+    }
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>S.N.</th>
+            <th>Category</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (categories?.Any() == true)
+        {
+            int sn = 1;
+            foreach (var category in categories)
+            {
+                <tr>
+                    <td>@sn</td>
+                    <td>@category.TransactionCategory</td>
+                    <td>
+                        <button @onclick="() => RemoveCategory(category)">Remove</button>
+                    </td>
+                </tr>
+                sn++;
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="3">No categories available.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private string selectedType = "Income";
+    private string newCategory = string.Empty;
+    private string errorMessage = string.Empty; // To store the error message
+    private List<TransactionCategoryTable> categories = new List<TransactionCategoryTable>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCategories();
+    }
+
+    private async Task LoadCategories()
+    {
+        errorMessage = "";
+        categories = DbContext.GetTableRows<TransactionCategoryTable>("TransactionCategoryTable")
+            .Where(c => c.TypeOfTransaction == selectedType)
+            .ToList();
+    }
+
+    private async Task AddCategory()
+    {
+        if (!string.IsNullOrWhiteSpace(newCategory))
+        {
+            var category = new TransactionCategoryTable
+                {
+                    TypeOfTransaction = selectedType,
+                    TransactionCategory = newCategory
+                };
+
+            await DbContext.CreateAsync(category);
+            newCategory = string.Empty;
+            await LoadCategories();
+        }
+        else
+        {
+            errorMessage = "Please enter a proper category.";
+            return;
+        }
+    }
+
+    private async Task RemoveCategory(TransactionCategoryTable category)
+    {
+        await DbContext.DeleteAsync(category);
+        await LoadCategories();
+    }
+
+    private async Task OnTypeChanged(ChangeEventArgs e)
+    {
+        selectedType = e.Value.ToString();
+        await LoadCategories();
+    }
+}
