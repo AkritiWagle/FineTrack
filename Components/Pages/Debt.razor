@@ -1,5 +1,62 @@
 ﻿@page "/Debt"
+@inject FineTrack.Database.ApplicationDbContext DbContext
 
-<h1>Debt page</h1>
+<h3>Debts</h3>
 
-This is our Debt page
+@if (Debts == null)
+{
+    <p>Loading...</p>
+}
+else if (Debts.Count == 0)
+{
+    <p>No Debts records.</p>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Amount</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Due Date</th>
+                <th>Source</th>
+                <th>Debt Date</th>
+                <th>Remarks</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var debt in Debts)
+            {
+                <tr>
+                    <td>@debt.DebtId</td>
+                    <td>@debt.DebtAmount.ToString("C")</td>
+                    <td>@debt.DebtCategory</td>
+                    <td>@debt.DebtStatus</td>
+                    <td>@debt.DebtDueDate.ToString("yyyy-MM-dd")</td>
+                    <td>@debt.DebtSource</td>
+                    <td>@debt.DebtDate.ToString("yyyy-MM-dd")</td>
+                    <td>@debt.DebtRemarks</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<FineTrack.Database.Debt> Debts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Debts = await DbContext.ReadAllDebtAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading Debts: {ex.Message}");
+            Debts = new List<FineTrack.Database.Debt>();
+        }
+    }
+}

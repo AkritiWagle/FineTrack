@@ -34,6 +34,7 @@ namespace FineTrack.Database
                 _dbConnection = new SQLiteAsyncConnection(databasePath, Flags);
                 _dbConnection.CreateTableAsync<Transaction>();
                 _dbConnection.CreateTableAsync<TransactionCategoryTable>();
+                _dbConnection.CreateTableAsync<Debt>();
 
             }
         }
@@ -89,12 +90,19 @@ namespace FineTrack.Database
             return await _dbConnection.Table<Transaction>().ToListAsync();
         }
 
+        public async Task<List<Debt>> ReadAllDebtAsync()
+        {
+            return await _dbConnection.Table<Debt>().ToListAsync();
+        }
+
         // Add a property to access the Transaction table
         public AsyncTableQuery<Transaction> Transactions => _dbConnection.Table<Transaction>();
 
         // Add a property to access the TransactionCategoryTable table
         public AsyncTableQuery<TransactionCategoryTable> TransactionCategories => _dbConnection.Table<TransactionCategoryTable>();
 
+        // Add a property to access the Debt table
+        public AsyncTableQuery<Debt> Debts => _dbConnection.Table<Debt>();
 
     }
 }
