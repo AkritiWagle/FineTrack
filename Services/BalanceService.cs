@@ -63,7 +63,7 @@ namespace FineTrack.Services
 
             TotalClearedDebt = totalClearedDebt;
             TotalDebt = TotalPendingDebt + TotalClearedDebt;
-            var debt = 0; // Replace with actual debt calculation when available
+            //var debt = 0; // Replace with actual debt calculation when available
             AvailableBalance = totalIncome + totalPendingDebt - totalExpense;
         }
 
