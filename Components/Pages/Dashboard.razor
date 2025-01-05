@@ -10,24 +10,8 @@
         margin-bottom: 20px;
     }
 
-    .dashboard-header {
-        display: flex;
-        justify-content: space-between;
-    }
-
     .chart-container {
         height: 300px;
-    }
-
-    .transaction-list {
-        margin-top: 20px;
-    }
-
-    .transaction-item {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px 0;
-        border-bottom: 1px solid #eee;
     }
 
     table {
@@ -65,20 +49,21 @@
         </div>
         <div class="col-md-4">
             <div class="dashboard-card bg-warning text-white text-center">
-                <h5>Cleared Debt</h5>
-                <h2>@BalanceService.TotalClearedDebt</h2>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="dashboard-card bg-warning text-white text-center">
-                <h5>Remaining Debt</h5>
-                <h2>@BalanceService.TotalPendingDebt</h2>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="dashboard-card bg-warning text-white text-center">
                 <h5>Total Debt</h5>
                 <h2>@BalanceService.TotalDebt</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="dashboard-card">
+                <h5>Monthly Income vs Expense (Bar Graph)</h5>
+                <div class="chart-container">
+                    <MudPaper Class="pa-4">
+                        <MudChart ChartType="ChartType.Bar" ChartSeries="@BarChartSeries" XAxisLabels="@BarChartLabels" Width="100%" Height="300px" />
+                    </MudPaper>
+                </div>
             </div>
         </div>
     </div>
@@ -109,6 +94,9 @@
     private List<FineTrack.Database.Transaction> LowestOutflows = new();
     private List<FineTrack.Database.Debt> HighestDebts = new();
     private List<FineTrack.Database.Debt> LowestDebts = new();
+
+    public List<ChartSeries> BarChartSeries = new List<ChartSeries>();
+    public string[] BarChartLabels = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
     protected override async Task OnInitializedAsync()
     {
@@ -155,6 +143,33 @@
             .OrderBy(d => d.DebtAmount)
             .Take(3)
             .ToList();
+
+        await GenerateBarChartData(transactions);
+    }
+
+    private async Task GenerateBarChartData(List<FineTrack.Database.Transaction> transactions)
+    {
+        var monthlyIncome = new double[12];
+        var monthlyExpense = new double[12];
+
+        foreach (var transaction in transactions)
+        {
+            int monthIndex = transaction.TransactionDate.Month - 1;
+            if (transaction.TransactionType == "Income")
+            {
+                monthlyIncome[monthIndex] += (double)transaction.TransactionAmount;
+            }
+            else if (transaction.TransactionType == "Expense")
+            {
+                monthlyExpense[monthIndex] += (double)transaction.TransactionAmount;
+            }
+        }
+
+        BarChartSeries = new List<ChartSeries>
+        {
+            new ChartSeries { Name = "Income", Data = monthlyIncome },
+            new ChartSeries { Name = "Expense", Data = monthlyExpense }
+        };
     }
 
     private RenderFragment RenderTable<T>(List<T> items) => builder =>
