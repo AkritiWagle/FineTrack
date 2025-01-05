@@ -118,23 +118,25 @@
     protected override async Task OnInitializedAsync()
     {
         categories.AddRange(BalanceService.IncomeCategories);
+        transactionModel.TransactionSource = categories.FirstOrDefault();
     }
 
     private void HandleTransactionTypeChange(ChangeEventArgs e)
     {
-        var selectedType = e.Value.ToString();
-        transactionModel.TransactionType = selectedType;
+        transactionModel.TransactionType = e.Value.ToString();
 
-        if (selectedType == "Income")
+        if (transactionModel.TransactionType == "Income")
         {
             categories = new List<string> { "Salary", "Allowances", "Interests", "Returns", "Other" };
             categories.AddRange(BalanceService.IncomeCategories);
         }
-        else if (selectedType == "Expense")
+        else if (transactionModel.TransactionType == "Expense")
         {
             categories = new List<string> { "Grocery", "Shopping", "Outing", "Returns", "Other" };
             categories.AddRange(BalanceService.ExpenseCategories);
         }
+
+        transactionModel.TransactionSource = categories.FirstOrDefault();
     }
 
     private async Task HandleFormSubmit()
@@ -183,7 +185,6 @@
         }
         else
         {
-            // Handle general transactions
             try
             {
                 if (transactionModel.TransactionAmount <= 0)
@@ -206,7 +207,7 @@
                     {
                         TransactionDate = DateTime.Now,
                         TransactionType = "Income",
-                        TransactionSource = "Salary"
+                        TransactionSource = categories.FirstOrDefault()
                     };
             }
             catch (Exception ex)
