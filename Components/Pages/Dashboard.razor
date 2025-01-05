@@ -4,106 +4,124 @@
 
 <style>
     .dashboard-card {
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        padding: 20px;
-        margin-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 10px;
     }
 
     .chart-container {
-        height: 250px;
-        overflow-x: auto;
-    }
-
-    .chart-label {
-        font-size: 14px;
-        color: black;
-        white-space: nowrap;
+    height: 250px;
+    overflow-x: auto;
     }
 
     .chart-legend {
-        display: flex;
-        justify-content: space-around;
-        margin-top: 10px;
+    display: flex;
+    justify-content: space-around;
+    margin-top: 10px;
     }
 
     .chart-legend-item {
-        display: flex;
-        align-items: center;
-        font-size: 14px;
-        white-space: nowrap;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    white-space: nowrap;
     }
 
     .chart-legend-box {
-        width: 16px;
-        height: 16px;
-        margin-right: 5px;
+    width: 16px;
+    height: 16px;
+    margin-right: 5px;
     }
 
     table {
-        width: 100%;
-        margin-top: 20px;
-        border-collapse: collapse;
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
     }
 
     th, td {
-        padding: 10px;
-        text-align: left;
-        border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #ddd;
     }
 
+
+
     th {
-        background-color: #f4f4f4;
+    background-color: #f4f4f4;
+    }
+
+    .row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    }
+
+    .col-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+    }
+
+    .col-12 {
+    flex: 0 0 100%;
+    max-width: 100%;
     }
 </style>
 
 <div class="container mt-4">
-    <h3 style="color:green">Available Balance: @BalanceService.AvailableBalance</h3>
-
     <div class="row">
-        <div class="col-md-2">
-            <div class="dashboard-card bg-success text-white text-center">
-                <h5>Total Inflows</h5>
-                <h4>@BalanceService.TotalInflows</h4>
+        <!-- Row A: Cards -->
+        <div class="col-6">
+            <div class="row">
+                <div class="col-3">
+                    <div class="dashboard-card bg-success text-white text-center">
+                        <h5>Available Balance</h5>
+                        <h4>@BalanceService.AvailableBalance</h4>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="dashboard-card bg-success text-white text-center">
+                        <h5>Total Inflows</h5>
+                        <h4>@BalanceService.TotalInflows</h4>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="dashboard-card bg-danger text-white text-center">
+                        <h5>Total Outflows</h5>
+                        <h4>@BalanceService.TotalOutflows</h4>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="dashboard-card bg-warning text-white text-center">
+                        <h5>Total Debt</h5>
+                        <h4>@BalanceService.TotalDebt</h4>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="dashboard-card bg-danger text-white text-center">
+                        <h5>Pending Debt</h5>
+                        <h4>@BalanceService.TotalPendingDebt</h4>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="dashboard-card bg-success text-white text-center">
+                        <h5>Cleared Debt</h5>
+                        <h4>@BalanceService.TotalClearedDebt</h4>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="col-md-2">
-            <div class="dashboard-card bg-danger text-white text-center">
-                <h5>Total Outflows</h5>
-                <h4>@BalanceService.TotalOutflows</h4>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="dashboard-card bg-warning text-white text-center">
-                <h5>Total Debt</h5>
-                <h4>@BalanceService.TotalDebt</h4>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="dashboard-card bg-danger text-white text-center">
-                <h5>Pending Debt</h5>
-                <h4>@BalanceService.TotalPendingDebt</h4>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="dashboard-card bg-success text-white text-center">
-                <h5>Cleared Debt</h5>
-                <h4>@BalanceService.TotalClearedDebt</h4>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6">
+        <div class="col-6">
             <div class="dashboard-card">
                 <h5>Income vs Expense</h5>
                 <div class="chart-container">
                     <MudPaper Class="pa-4">
                         <MudChart ChartType="ChartType.Bar"
-                                  ChartSeries="@BarChartSeries"
-                                  XAxisLabels="@BarChartLabels"
-                                  Width="100%"
-                                  Height="250px" />
+                        ChartSeries="@BarChartSeries"
+                        XAxisLabels="@BarChartLabels"
+                        Width="100%"
+                        Height="250px" />
                     </MudPaper>
                     <div class="chart-legend">
                         <div class="chart-legend-item">
@@ -120,23 +138,53 @@
         </div>
     </div>
 
-    <h3>Top Highest Inflows</h3>
-    @RenderTable(HighestInflows)
+    <!-- Row B: Bar Graph -->
+    <div class="row">
 
-    <h3>Top Lowest Inflows</h3>
-    @RenderTable(LowestInflows)
+    </div>
 
-    <h3>Top Highest Outflows</h3>
-    @RenderTable(HighestOutflows)
+    <!-- Row C and D: Inflow and Outflow -->
+    <div class="table-container">
+        <div class="row">
+            <h5>Highest Inflows</h5>
+            @RenderTable(HighestInflows.Take(3).ToList())
+        </div>
+        <div class="row">
+            <h5>Lowest Inflows</h5>
+            @RenderTable(LowestInflows.Take(3).ToList())
+        </div>
+        <div class="row">
+            <h5>Highest Outflows</h5>
+            @RenderTable(HighestOutflows.Take(3).ToList())
 
-    <h3>Top Lowest Outflows</h3>
-    @RenderTable(LowestOutflows)
+        </div>
+        <div class="row">
+            <h5>Lowest Outflows</h5>
+            @RenderTable(LowestOutflows.Take(3).ToList())
+        </div>
 
-    <h3>Top Highest Debts</h3>
-    @RenderTable(HighestDebts)
+        <!-- Row E and F: Debt -->
+        <div class="row">
+            <h5>Highest Debts</h5>
+            @RenderTable(HighestDebts.Take(3).ToList())
 
-    <h3>Top Lowest Debts</h3>
-    @RenderTable(LowestDebts)
+        </div>
+        <div class="row">
+            <h5>Lowest Debts</h5>
+            @RenderTable(LowestDebts.Take(3).ToList())
+        </div>
+    </div>
+
+    <!-- Row G and H: Pending and Cleared Debts -->
+    <div class="row"> 
+            <h5>Pending Debt</h5>
+            @RenderTable(PendingDebt.ToList())
+            
+    </div> 
+    <div class="row">
+        <h5>Cleared Debt</h5>
+        @RenderTable(ClearedDebt.ToList())
+    </div>
 </div>
 
 @code {
@@ -146,6 +194,8 @@
     private List<FineTrack.Database.Transaction> LowestOutflows = new();
     private List<FineTrack.Database.Debt> HighestDebts = new();
     private List<FineTrack.Database.Debt> LowestDebts = new();
+    private List<FineTrack.Database.Debt> PendingDebt = new();
+    private List<FineTrack.Database.Debt> ClearedDebt = new();
 
     public List<ChartSeries> BarChartSeries = new List<ChartSeries>();
     public string[] BarChartLabels = { "Nov", "Dec", "Jan" }; // Example for three months
@@ -155,49 +205,25 @@
         await BalanceService.UpdateAvailableBalanceAsync();
         await BalanceService.UpdateTransactionCategoriesAsync();
 
-        // Fetch and process transactions
         var transactions = await DbContext.Transactions.ToListAsync();
         var debts = await DbContext.Debts.ToListAsync();
 
-        // Filter top 3 highest and lowest inflows
-        HighestInflows = transactions
-            .Where(t => t.TransactionType == "Income")
-            .OrderByDescending(t => t.TransactionAmount)
-            .Take(3)
-            .ToList();
+        HighestInflows = transactions.Where(t => t.TransactionType == "Income").OrderByDescending(t => t.TransactionAmount).Take(3).ToList();
+        LowestInflows = transactions.Where(t => t.TransactionType == "Income").OrderBy(t => t.TransactionAmount).Take(3).ToList();
 
-        LowestInflows = transactions
-            .Where(t => t.TransactionType == "Income")
-            .OrderBy(t => t.TransactionAmount)
-            .Take(3)
-            .ToList();
+        HighestOutflows = transactions.Where(t => t.TransactionType == "Expense").OrderByDescending(t => t.TransactionAmount).Take(3).ToList();
+        LowestOutflows = transactions.Where(t => t.TransactionType == "Expense").OrderBy(t => t.TransactionAmount).Take(3).ToList();
 
-        // Filter top 3 highest and lowest outflows
-        HighestOutflows = transactions
-            .Where(t => t.TransactionType == "Expense")
-            .OrderByDescending(t => t.TransactionAmount)
-            .Take(3)
-            .ToList();
+        HighestDebts = debts.OrderByDescending(d => d.DebtAmount).Take(3).ToList();
+        LowestDebts = debts.OrderBy(d => d.DebtAmount).Take(3).ToList();
 
-        LowestOutflows = transactions
-            .Where(t => t.TransactionType == "Expense")
-            .OrderBy(t => t.TransactionAmount)
-            .Take(3)
-            .ToList();
-
-        // Filter top 3 highest and lowest debts
-        HighestDebts = debts
-            .OrderByDescending(d => d.DebtAmount)
-            .Take(3)
-            .ToList();
-
-        LowestDebts = debts
-            .OrderBy(d => d.DebtAmount)
-            .Take(3)
-            .ToList();
+        PendingDebt = debts.Where(d => d.DebtStatus == "Pending").ToList();
+        ClearedDebt = debts.Where(d => d.DebtStatus == "Cleared").ToList();
 
         await GenerateBarChartData(transactions);
     }
+
+
 
     private async Task GenerateBarChartData(List<FineTrack.Database.Transaction> transactions)
     {
@@ -206,8 +232,8 @@
 
         foreach (var transaction in transactions)
         {
-            var month = transaction.TransactionDate.Month; // Adjust dynamically for three months
-            if (month >= 11 || month <= 1) // Assuming Nov, Dec, Jan for example
+            var month = transaction.TransactionDate.Month;
+            if (month >= 11 || month <= 1)
             {
                 int monthIndex = (month == 11) ? 0 : (month == 12 ? 1 : 2);
 
@@ -224,8 +250,8 @@
 
         BarChartSeries = new List<ChartSeries>
         {
-            new ChartSeries { Name = "", Data = monthlyIncome},
-            new ChartSeries { Name = "", Data = monthlyExpense }
+            new ChartSeries { Name = "Income", Data = monthlyIncome},
+            new ChartSeries { Name = "Expense", Data = monthlyExpense }
         };
     }
 
