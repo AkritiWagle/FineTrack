@@ -6,59 +6,92 @@
 <p>Total Debt Transactions: @BalanceService.DebtTransactionCount</p>
 <p>Available Balance: @BalanceService.AvailableBalance.ToString("C")</p>
 
-@if (Debts == null)
+<div class="d-flex mb-3">
+    <select class="form-select me-2" @bind="filterCategory">
+        <option value="">Filter by Category</option>
+        @if (Debts != null)
+        {
+            @foreach (var category in Debts.Where(d => d.DebtCategory != null).Select(d => d.DebtCategory).Distinct())
+            {
+                <option value="@category">@category</option>
+            }
+        }
+    </select>
+
+    <select class="form-select me-2" @bind="filterStatus">
+        <option value="">Filter by Status</option>
+        <option value="Pending">Pending</option>
+        <option value="Cleared">Cleared</option>
+    </select>
+
+    @* <select class="form-select me-2" @bind="filterSource"> *@
+    @*     <option value="">Filter by Source</option> *@
+    @*     @foreach (var source in Debts.Select(d => d.DebtSource).Distinct()) *@
+    @*     { *@
+    @*         <option value="@source">@source</option> *@
+    @*     } *@
+    @* </select> *@
+
+    <input type="date" class="form-control me-2" @bind="filterStartDate" />
+    <input type="date" class="form-control me-2" @bind="filterEndDate" />
+
+    <button class="btn btn-primary me-2" @onclick="ApplyFilters">Apply Filters</button>
+    <button class="btn btn-secondary" @onclick="ClearFilters">Clear Filters</button>
+</div>
+
+@if (filteredDebts == null)
 {
-        <p>Loading...</p>
+    <p>Loading...</p>
 }
-else if (Debts.Count == 0)
+else if (filteredDebts.Count == 0)
 {
-        <p>No Debts records.</p>
+    <p>No Debts records.</p>
 }
 else
 {
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Select</th>
-                    <th>ID</th>
-                    <th>Amount</th>
-                    <th>Category</th>
-                    <th>Status</th>
-                    <th>
-                        Due Date
-                        <button class="btn btn-link btn-sm" @onclick="ToggleSortByDueDate">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Select</th>
+                <th>ID</th>
+                <th>Amount</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>
+                    Due Date
+                    <button class="btn btn-link btn-sm" @onclick="ToggleSortByDueDate">
                         @((isSortingByDueDateAscending ? "↑" : "↓"))
-                        </button>
-                    </th>
-                    <th>Source</th>
-                    <th>
-                        Debt Date
-                        <button class="btn btn-link btn-sm" @onclick="ToggleSortByDebtDate">
+                    </button>
+                </th>
+                <th>Source</th>
+                <th>
+                    Debt Date
+                    <button class="btn btn-link btn-sm" @onclick="ToggleSortByDebtDate">
                         @((isSortingByDebtDateAscending ? "↑" : "↓"))
-                        </button>
-                    </th>
-                    <th>Remarks</th>
-                </tr>
-            </thead>
-            <tbody>
-            @foreach (var debt in Debts)
+                    </button>
+                </th>
+                <th>Remarks</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var debt in filteredDebts)
             {
-                    <tr>
-                        <td>
-                            <input type="radio" name="selectedDebt" @onclick="() => SelectDebt(debt)" />
-                        </td>
-                        <td>@debt.DebtId</td>
-                        <td>@debt.DebtAmount.ToString("C")</td>
-                        <td>@debt.DebtCategory</td>
-                        <td>@debt.DebtStatus</td>
-                        <td>@debt.DebtDueDate.ToString("yyyy-MM-dd")</td>
-                        <td>@debt.DebtSource</td>
-                        <td>@debt.DebtDate.ToString("yyyy-MM-dd")</td>
-                        <td>@debt.DebtRemarks</td>
-                    </tr>
+                <tr style="background-color: @(debt.DebtStatus == "Pending" ? "yellow" : (debt.DebtStatus == "Cleared" ? "lightgreen" : "transparent"))">
+                    <td>
+                        <input type="radio" name="selectedDebt" @onclick="() => SelectDebt(debt)" />
+                    </td>
+                    <td>@debt.DebtId</td>
+                    <td>@debt.DebtAmount.ToString("C")</td>
+                    <td>@debt.DebtCategory</td>
+                    <td>@debt.DebtStatus</td>
+                    <td>@debt.DebtDueDate.ToString("yyyy-MM-dd")</td>
+                    <td>@debt.DebtSource</td>
+                    <td>@debt.DebtDate.ToString("yyyy-MM-dd")</td>
+                    <td>@debt.DebtRemarks</td>
+                </tr>
             }
-            </tbody>
-        </table>
+        </tbody>
+    </table>
 }
 
 <button class="btn btn-primary" @onclick="ClearSelectedDebt" disabled="@(selectedDebt == null || selectedDebt.DebtStatus != "Pending")">
@@ -67,27 +100,35 @@ else
 
 @if (!string.IsNullOrEmpty(errorMessage))
 {
-        <div class="alert alert-danger mt-3">@errorMessage</div>
+    <div class="alert alert-danger mt-3">@errorMessage</div>
 }
 
 @code {
     private List<FineTrack.Database.Debt> Debts;
+    private List<FineTrack.Database.Debt> filteredDebts;
     private bool isSortingByDueDateAscending = true;
     private bool isSortingByDebtDateAscending = true;
-    private FineTrack.Database.Debt selectedDebt; // Holds the currently selected debt
-    private string errorMessage; // Holds any error messages
+    private FineTrack.Database.Debt selectedDebt;
+    private string filterCategory = "";
+    private string filterStatus = "";
+    private string filterSource = "";
+    private DateTime? filterStartDate;
+    private DateTime? filterEndDate;
+    private string errorMessage;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             Debts = await DbContext.ReadAllDebtAsync();
-            SortByDebtDate(); // Default sorting by DebtDate ascending
+            filteredDebts = new List<FineTrack.Database.Debt>(Debts);
+            SortByDebtDate(); // Default sorting
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error loading Debts: {ex.Message}");
             Debts = new List<FineTrack.Database.Debt>();
+            filteredDebts = new List<FineTrack.Database.Debt>();
         }
     }
 
@@ -101,11 +142,11 @@ else
     {
         if (isSortingByDueDateAscending)
         {
-            Debts = Debts.OrderBy(d => d.DebtDueDate).ToList();
+            filteredDebts = filteredDebts.OrderBy(d => d.DebtDueDate).ToList();
         }
         else
         {
-            Debts = Debts.OrderByDescending(d => d.DebtDueDate).ToList();
+            filteredDebts = filteredDebts.OrderByDescending(d => d.DebtDueDate).ToList();
         }
     }
 
@@ -119,18 +160,18 @@ else
     {
         if (isSortingByDebtDateAscending)
         {
-            Debts = Debts.OrderBy(d => d.DebtDate).ToList();
+            filteredDebts = filteredDebts.OrderBy(d => d.DebtDate).ToList();
         }
         else
         {
-            Debts = Debts.OrderByDescending(d => d.DebtDate).ToList();
+            filteredDebts = filteredDebts.OrderByDescending(d => d.DebtDate).ToList();
         }
     }
 
     private void SelectDebt(FineTrack.Database.Debt debt)
     {
         selectedDebt = debt;
-        errorMessage = string.Empty; // Clear any previous error messages
+        errorMessage = string.Empty; // Clear previous errors
     }
 
     private async Task ClearSelectedDebt()
@@ -147,18 +188,40 @@ else
             return;
         }
 
-        // Update the debt status to "Cleared"
         selectedDebt.DebtStatus = "Cleared";
 
         try
         {
-            await DbContext.UpdateAsync(selectedDebt); // Update the database
+            await DbContext.UpdateAsync(selectedDebt);
             await BalanceService.UpdateAvailableBalanceAsync();
-            errorMessage = string.Empty; // Clear error message
+            errorMessage = string.Empty;
         }
         catch (Exception ex)
         {
             errorMessage = $"Failed to clear the debt: {ex.Message}";
         }
+    }
+
+    private void ApplyFilters()
+    {
+        filteredDebts = Debts
+            .Where(d => string.IsNullOrEmpty(filterCategory) || d.DebtCategory == filterCategory)
+            .Where(d => string.IsNullOrEmpty(filterStatus) || d.DebtStatus == filterStatus)
+            .Where(d => string.IsNullOrEmpty(filterSource) || d.DebtSource == filterSource)
+            .Where(d => !filterStartDate.HasValue || d.DebtDate >= filterStartDate.Value)
+            .Where(d => !filterEndDate.HasValue || d.DebtDate <= filterEndDate.Value)
+            .ToList();
+        SortByDebtDate(); // Maintain the current sorting
+    }
+
+    private void ClearFilters()
+    {
+        filterCategory = "";
+        filterStatus = "";
+        filterSource = "";
+        filterStartDate = null;
+        filterEndDate = null;
+        filteredDebts = new List<FineTrack.Database.Debt>(Debts);
+        SortByDebtDate();
     }
 }
