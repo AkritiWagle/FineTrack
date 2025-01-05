@@ -11,7 +11,33 @@
     }
 
     .chart-container {
-        height: 300px;
+        height: 250px;
+        overflow-x: auto;
+    }
+
+    .chart-label {
+        font-size: 14px;
+        color: black;
+        white-space: nowrap;
+    }
+
+    .chart-legend {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 10px;
+    }
+
+    .chart-legend-item {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    .chart-legend-box {
+        width: 16px;
+        height: 16px;
+        margin-right: 5px;
     }
 
     table {
@@ -35,22 +61,34 @@
     <h3 style="color:green">Available Balance: @BalanceService.AvailableBalance</h3>
 
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-2">
             <div class="dashboard-card bg-success text-white text-center">
                 <h5>Total Inflows</h5>
-                <h2>@BalanceService.TotalInflows</h2>
+                <h4>@BalanceService.TotalInflows</h4>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-2">
             <div class="dashboard-card bg-danger text-white text-center">
                 <h5>Total Outflows</h5>
-                <h2>@BalanceService.TotalOutflows</h2>
+                <h4>@BalanceService.TotalOutflows</h4>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-2">
             <div class="dashboard-card bg-warning text-white text-center">
                 <h5>Total Debt</h5>
-                <h2>@BalanceService.TotalDebt</h2>
+                <h4>@BalanceService.TotalDebt</h4>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="dashboard-card bg-danger text-white text-center">
+                <h5>Pending Debt</h5>
+                <h4>@BalanceService.TotalPendingDebt</h4>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="dashboard-card bg-success text-white text-center">
+                <h5>Cleared Debt</h5>
+                <h4>@BalanceService.TotalClearedDebt</h4>
             </div>
         </div>
     </div>
@@ -58,11 +96,25 @@
     <div class="row">
         <div class="col-md-6">
             <div class="dashboard-card">
-                <h5>Monthly Income vs Expense (Bar Graph)</h5>
+                <h5>Income vs Expense</h5>
                 <div class="chart-container">
                     <MudPaper Class="pa-4">
-                        <MudChart ChartType="ChartType.Bar" ChartSeries="@BarChartSeries" XAxisLabels="@BarChartLabels" Width="100%" Height="300px" />
+                        <MudChart ChartType="ChartType.Bar"
+                                  ChartSeries="@BarChartSeries"
+                                  XAxisLabels="@BarChartLabels"
+                                  Width="100%"
+                                  Height="250px" />
                     </MudPaper>
+                    <div class="chart-legend">
+                        <div class="chart-legend-item">
+                            <div class="chart-legend-box" style="background-color: green;"></div>
+                            Income
+                        </div>
+                        <div class="chart-legend-item">
+                            <div class="chart-legend-box" style="background-color: red;"></div>
+                            Expense
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -96,7 +148,7 @@
     private List<FineTrack.Database.Debt> LowestDebts = new();
 
     public List<ChartSeries> BarChartSeries = new List<ChartSeries>();
-    public string[] BarChartLabels = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+    public string[] BarChartLabels = { "Nov", "Dec", "Jan" }; // Example for three months
 
     protected override async Task OnInitializedAsync()
     {
@@ -149,26 +201,31 @@
 
     private async Task GenerateBarChartData(List<FineTrack.Database.Transaction> transactions)
     {
-        var monthlyIncome = new double[12];
-        var monthlyExpense = new double[12];
+        var monthlyIncome = new double[3];
+        var monthlyExpense = new double[3];
 
         foreach (var transaction in transactions)
         {
-            int monthIndex = transaction.TransactionDate.Month - 1;
-            if (transaction.TransactionType == "Income")
+            var month = transaction.TransactionDate.Month; // Adjust dynamically for three months
+            if (month >= 11 || month <= 1) // Assuming Nov, Dec, Jan for example
             {
-                monthlyIncome[monthIndex] += (double)transaction.TransactionAmount;
-            }
-            else if (transaction.TransactionType == "Expense")
-            {
-                monthlyExpense[monthIndex] += (double)transaction.TransactionAmount;
+                int monthIndex = (month == 11) ? 0 : (month == 12 ? 1 : 2);
+
+                if (transaction.TransactionType == "Income")
+                {
+                    monthlyIncome[monthIndex] += (double)transaction.TransactionAmount;
+                }
+                else if (transaction.TransactionType == "Expense")
+                {
+                    monthlyExpense[monthIndex] += (double)transaction.TransactionAmount;
+                }
             }
         }
 
         BarChartSeries = new List<ChartSeries>
         {
-            new ChartSeries { Name = "Income", Data = monthlyIncome },
-            new ChartSeries { Name = "Expense", Data = monthlyExpense }
+            new ChartSeries { Name = "", Data = monthlyIncome},
+            new ChartSeries { Name = "", Data = monthlyExpense }
         };
     }
 
