@@ -1,5 +1,7 @@
-﻿@page "/" 
+﻿@page "/"
 @inject FineTrack.Services.BalanceService BalanceService
+@inject FineTrack.Database.ApplicationDbContext DbContext
+
 <style>
     .dashboard-card {
         border-radius: 10px;
@@ -28,13 +30,20 @@
         border-bottom: 1px solid #eee;
     }
 
-    .donut-inner-text {
-        font-size: 3px;
+    table {
+        width: 100%;
+        margin-top: 20px;
+        border-collapse: collapse;
     }
 
-    .donut-total-text {
-        font-size: 5px;
-        font-weight: bold;
+    th, td {
+        padding: 10px;
+        text-align: left;
+        border: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #f4f4f4;
     }
 </style>
 
@@ -73,39 +82,115 @@
             </div>
         </div>
     </div>
-</Div>
 
-@if (BalanceService.IncomeCategories.Any())
-{
-    <h3>Custom Income Categories</h3>
-    <ul>
-        @foreach (var category in BalanceService.IncomeCategories)
+    <h3>Top Highest Inflows</h3>
+    @RenderTable(HighestInflows)
+
+    <h3>Top Lowest Inflows</h3>
+    @RenderTable(LowestInflows)
+
+    <h3>Top Highest Outflows</h3>
+    @RenderTable(HighestOutflows)
+
+    <h3>Top Lowest Outflows</h3>
+    @RenderTable(LowestOutflows)
+
+    <h3>Top Highest Debts</h3>
+    @RenderTable(HighestDebts)
+
+    <h3>Top Lowest Debts</h3>
+    @RenderTable(LowestDebts)
+</div>
+
+@code {
+    private List<FineTrack.Database.Transaction> HighestInflows = new();
+    private List<FineTrack.Database.Transaction> LowestInflows = new();
+    private List<FineTrack.Database.Transaction> HighestOutflows = new();
+    private List<FineTrack.Database.Transaction> LowestOutflows = new();
+    private List<FineTrack.Database.Debt> HighestDebts = new();
+    private List<FineTrack.Database.Debt> LowestDebts = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await BalanceService.UpdateAvailableBalanceAsync();
+        await BalanceService.UpdateTransactionCategoriesAsync();
+
+        // Fetch and process transactions
+        var transactions = await DbContext.Transactions.ToListAsync();
+        var debts = await DbContext.Debts.ToListAsync();
+
+        // Filter top 3 highest and lowest inflows
+        HighestInflows = transactions
+            .Where(t => t.TransactionType == "Income")
+            .OrderByDescending(t => t.TransactionAmount)
+            .Take(3)
+            .ToList();
+
+        LowestInflows = transactions
+            .Where(t => t.TransactionType == "Income")
+            .OrderBy(t => t.TransactionAmount)
+            .Take(3)
+            .ToList();
+
+        // Filter top 3 highest and lowest outflows
+        HighestOutflows = transactions
+            .Where(t => t.TransactionType == "Expense")
+            .OrderByDescending(t => t.TransactionAmount)
+            .Take(3)
+            .ToList();
+
+        LowestOutflows = transactions
+            .Where(t => t.TransactionType == "Expense")
+            .OrderBy(t => t.TransactionAmount)
+            .Take(3)
+            .ToList();
+
+        // Filter top 3 highest and lowest debts
+        HighestDebts = debts
+            .OrderByDescending(d => d.DebtAmount)
+            .Take(3)
+            .ToList();
+
+        LowestDebts = debts
+            .OrderBy(d => d.DebtAmount)
+            .Take(3)
+            .ToList();
+    }
+
+    private RenderFragment RenderTable<T>(List<T> items) => builder =>
+    {
+        if (items == null || !items.Any())
         {
-            <li>@category</li>
+            builder.AddContent(0, "No data available.");
+            return;
         }
-    </ul>
-}
 
-@if (BalanceService.ExpenseCategories.Any())
-{
-    <h3>Custom Expense Categories</h3>
-    <ul>
-        @foreach (var category in BalanceService.ExpenseCategories)
+        builder.OpenElement(0, "table");
+        builder.OpenElement(1, "thead");
+        builder.OpenElement(2, "tr");
+        foreach (var prop in typeof(T).GetProperties())
         {
-            <li>@category</li>
+            builder.OpenElement(3, "th");
+            builder.AddContent(4, prop.Name);
+            builder.CloseElement();
         }
-    </ul>
-}
-@code 
-{
-	protected override async Task OnInitializedAsync()
-	{
-		await BalanceService.UpdateAvailableBalanceAsync();
-		await BalanceService.UpdateTransactionCategoriesAsync();
+        builder.CloseElement();
+        builder.CloseElement();
 
-	}
+        builder.OpenElement(5, "tbody");
+        foreach (var item in items)
+        {
+            builder.OpenElement(6, "tr");
+            foreach (var prop in typeof(T).GetProperties())
+            {
+                builder.OpenElement(7, "td");
+                builder.AddContent(8, prop.GetValue(item)?.ToString() ?? "");
+                builder.CloseElement();
+            }
+            builder.CloseElement();
+        }
+        builder.CloseElement();
 
-
-
-
+        builder.CloseElement();
+    };
 }
