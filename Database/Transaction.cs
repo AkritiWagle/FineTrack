@@ -14,6 +14,7 @@ namespace FineTrack.Database
     {
         [PrimaryKey,AutoIncrement]
         public int TransactionId { get; set; }
+        public string TransactionTitle { get; set; }
 
 
         public string TransactionType { get; set; }
@@ -25,6 +26,8 @@ namespace FineTrack.Database
         public DateTime TransactionDate { get; set; }
 
         public string Remarks { get; set; }
+        public int UserId { get; set; }
+
 
     }
 }

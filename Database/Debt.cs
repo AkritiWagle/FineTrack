@@ -14,6 +14,7 @@ namespace FineTrack.Database
     {
         [PrimaryKey, AutoIncrement]
         public int DebtId { get; set; }
+        public string DebtTitle { get; set; }
 
         public string DebtCategory { get; set; }
 
@@ -28,6 +29,8 @@ namespace FineTrack.Database
         public DateTime DebtDueDate { get; set; }
 
         public string DebtRemarks { get; set; }
+        public int UserId { get; set; }
+
 
     }
 }

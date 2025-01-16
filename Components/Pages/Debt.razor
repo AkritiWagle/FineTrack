@@ -1,6 +1,8 @@
 ﻿@page "/Debt"
 @inject FineTrack.Database.ApplicationDbContext DbContext
 @inject FineTrack.Services.BalanceService BalanceService
+@inject FineTrack.Services.UserSessionService UserSessionService
+
 
 <h3>Debts</h3>
 <p>Total Debt Transactions: @BalanceService.DebtTransactionCount</p>

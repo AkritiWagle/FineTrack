@@ -2,6 +2,8 @@
 @using FineTrack.Database
 @inject ApplicationDbContext DbContext
 @inject FineTrack.Services.BalanceService BalanceService
+@inject FineTrack.Services.UserSessionService UserSessionService
+
 
 <h3 class="text-center">Manage Custom Transaction Categories</h3>
 
@@ -89,7 +91,8 @@
             var category = new TransactionCategoryTable
                 {
                     TypeOfTransaction = selectedType,
-                    TransactionCategory = newCategory
+                    TransactionCategory = newCategory,
+                    UserId = UserSessionService.CurrentUser.UserId
                 };
 
             await DbContext.CreateAsync(category);

@@ -1,4 +1,5 @@
 ﻿@page "/TrackTransaction"
+@inject FineTrack.Services.UserSessionService UserSessionService
 @inject FineTrack.Database.ApplicationDbContext DbContext
 @inject FineTrack.Services.BalanceService BalanceService
 
@@ -141,6 +142,8 @@
 
     private async Task HandleFormSubmit()
     {
+        transactionModel.UserId = UserSessionService.CurrentUser.UserId;
+        debtModel.UserId = UserSessionService.CurrentUser.UserId;
         if (transactionModel.TransactionType == "Debt")
         {
             if (debtModel.DebtAmount <= 0)

@@ -18,6 +18,8 @@ namespace FineTrack.Database
         public string TypeOfTransaction { get; set; }
 
         public string TransactionCategory { get; set; }
+        public int UserId { get; set; }
+
 
     }
 }
