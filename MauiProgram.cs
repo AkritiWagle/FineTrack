@@ -25,6 +25,7 @@ namespace FineTrack
 
             builder.Services.AddSingleton<ApplicationDbContext>();
             builder.Services.AddScoped<BalanceService>();
+            builder.Services.AddScoped<UserSessionService>();
 
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();

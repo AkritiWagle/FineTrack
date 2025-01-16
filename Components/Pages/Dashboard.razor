@@ -1,5 +1,6 @@
 ﻿@page "/Dashboard"
 @inject FineTrack.Services.BalanceService BalanceService
+@inject FineTrack.Services.UserSessionService UserSessionService
 @inject FineTrack.Database.ApplicationDbContext DbContext
 
 <style>
@@ -47,7 +48,6 @@
     }
 
 
-
     th {
     background-color: #f4f4f4;
     }
@@ -79,6 +79,8 @@
                         <h6>Available Balance</h6>
                         <h6>@BalanceService.AvailableBalance</h6>
                     </div>
+                    currentUser @UserSessionService.CurrentUser asddd
+                    is logged in  @UserSessionService.IsLoggedIn asdas
                 </div>
                 <div class="col-3">
                     <div class="dashboard-card bg-success text-white text-center">

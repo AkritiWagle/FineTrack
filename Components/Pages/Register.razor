@@ -1,21 +1,22 @@
 ﻿@page "/Register"
+@inject NavigationManager NavigationManager
 
 <h3>Register</h3>
 
 <div>
     <div class="form-group">
         <label> User Name </label>
-        <input type="text" class="form-control" placeholder="Enter Username" />
+        <input type="text" class="form-control" placeholder="Enter Username" @bind="Username" />
     </div>
 
     <div class="mt-2 form-group">
         <label> Password </label>
-        <input type="password" class="form-control" placeholder="Enter Password" />
+        <input type="password" class="form-control" placeholder="Enter Password" @bind="Password" />
     </div>
-    
-    <div>
+
+    <div class="form-group">
         <label>Preferred Currency:</label>
-        <select>
+        <select class="form-control" @bind="PreferredCurrency">
             <option value="">Select</option>
             <option value="USD">USD</option>
             <option value="EUR">EUR</option>
@@ -25,14 +26,36 @@
     </div>
 
     <div class="mt-2 form-group">
-        <button class="btn btn-primary" type="submit"> Register </button>
+        <button class="btn btn-primary" @onclick="RegisterUser">Register</button>
     </div>
-
 </div>
+
 <nav>
     Already have an account ? <NavLink href="/">Login</NavLink>
 </nav>
 
 @code {
+    private string Username { get; set; }
+    private string Password { get; set; }
+    private string PreferredCurrency { get; set; }
 
+    private async Task RegisterUser()
+    {
+        if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password) || string.IsNullOrWhiteSpace(PreferredCurrency))
+        {
+            // Show validation error (you can use MudBlazor Snackbar or other UI components)
+            return;
+        }
+
+        var newUser = new User
+            {
+                Username = Username,
+                Password = Password, // Consider hashing the password for security
+                PreferredCurrency = PreferredCurrency
+            };
+
+        await App.Database.CreateAsync(newUser);
+        // Redirect to login page after registration
+        NavigationManager.NavigateTo("/");
+    }
 }

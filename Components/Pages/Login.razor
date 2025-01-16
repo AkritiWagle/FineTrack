@@ -1,27 +1,49 @@
 ﻿@page "/"
+@inject NavigationManager NavigationManager
 
 <h3>Login</h3>
 
 <div>
     <div class="form-group">
         <label> User Name </label>
-        <input type="text" class="form-control" placeholder="Enter Username" />
+        <input type="text" class="form-control" placeholder="Enter Username" @bind="Username" />
     </div>
 
     <div class="mt-2 form-group">
         <label> Password </label>
-        <input type="password" class="form-control" placeholder="Enter Password" />
+        <input type="password" class="form-control" placeholder="Enter Password" @bind="Password" />
     </div>
 
     <div class="mt-2 form-group">
-        <button class="btn btn-primary" type="submit"> Login </button>
+        <button class="btn btn-primary" @onclick="LoginUser">Login</button>
     </div>
 
     <nav>
-        Do not have an account ? Create Now <NavLink href="/Register">Register</NavLink>
+        Do not have an account? Create Now <NavLink href="/Register">Register</NavLink>
     </nav>
 </div>
 
 @code {
+    private string Username { get; set; }
+    private string Password { get; set; }
 
+    private async Task LoginUser()
+    {
+        var user = App.Database.GetTableRow<User>("User", "Username", Username) as User;
+
+        if (user != null && user.Password == Password) // Replace with hashed password comparison
+        {
+            // Store user info in session or state
+            CurrentUser = user;
+
+            // Redirect to dashboard or home
+            NavigationManager.NavigateTo("/Dashboard");
+        }
+        else
+        {
+            // Show login error
+        }
+    }
+
+    private User CurrentUser { get; set; }
 }
