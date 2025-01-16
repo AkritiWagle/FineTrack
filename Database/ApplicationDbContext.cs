@@ -35,6 +35,7 @@ namespace FineTrack.Database
                 _dbConnection.CreateTableAsync<Transaction>();
                 _dbConnection.CreateTableAsync<TransactionCategoryTable>();
                 _dbConnection.CreateTableAsync<Debt>();
+                _dbConnection.CreateTableAsync<User>();
 
             }
         }
