@@ -16,7 +16,12 @@ namespace FineTrack.Services
         {
             CurrentUser = user;
         }
-        public bool IsLoggedIn => CurrentUser != null;
+
+        public bool IsLoggedIn()
+        {
+            return CurrentUser != null;
+            
+        }
 
         public void Logout()
         {

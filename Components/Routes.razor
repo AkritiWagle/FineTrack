@@ -1,6 +1,31 @@
-﻿<Router AppAssembly="@typeof(MauiProgram).Assembly">
+﻿@inject FineTrack.Services.UserSessionService UserSessionService
+@inject NavigationManager NavigationManager
+
+<Router AppAssembly="@typeof(MauiProgram).Assembly">
     <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)" />
-        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        @if (IsPublicPage(NavigationManager.Uri) || UserSessionService.IsLoggedIn())
+        {
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)" />
+            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        }
+        else
+        {
+            @RedirectToLogin()
+        }
     </Found>
 </Router>
+
+@code {
+    private bool IsPublicPage(string currentUri)
+    {
+        // List of public page routes
+        var publicPages = new[] { "/", "/Register" };
+        var relativeUri = NavigationManager.ToBaseRelativePath(currentUri).Split('?')[0];
+        return publicPages.Contains($"/{relativeUri}");
+    }
+
+    private RenderFragment RedirectToLogin() => builder =>
+    {
+        NavigationManager.NavigateTo("/");
+    };
+}
