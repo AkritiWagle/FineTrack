@@ -1,5 +1,7 @@
 ﻿@page "/"
 @inject NavigationManager NavigationManager
+@inject FineTrack.Services.UserSessionService UserSessionService
+
 
 <h3>Login</h3>
 
@@ -26,15 +28,21 @@
 @code {
     private string Username { get; set; }
     private string Password { get; set; }
+    private User? CurrentUser { get; set; }
+
 
     private async Task LoginUser()
     {
         var user = App.Database.GetTableRow<User>("User", "Username", Username) as User;
 
         if (user != null && user.Password == Password) // Replace with hashed password comparison
+        
         {
+            UserSessionService.SetCurrentUser(user);
+
             // Store user info in session or state
-            CurrentUser = user;
+            // CurrentUser = user;
+            Console.WriteLine(CurrentUser);
 
             // Redirect to dashboard or home
             NavigationManager.NavigateTo("/Dashboard");
@@ -45,5 +53,4 @@
         }
     }
 
-    private User CurrentUser { get; set; }
 }

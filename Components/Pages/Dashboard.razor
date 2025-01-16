@@ -79,7 +79,7 @@
                         <h6>Available Balance</h6>
                         <h6>@BalanceService.AvailableBalance</h6>
                     </div>
-                    currentUser @UserSessionService.CurrentUser asddd
+                    currentUser @UserSessionService.CurrentUser.UserId asddd
                     is logged in  @UserSessionService.IsLoggedIn asdas
                 </div>
                 <div class="col-3">
@@ -179,9 +179,9 @@
 
     <!-- Row G and H: Pending and Cleared Debts -->
     <div class="row"> 
-            <h5>Pending Debt</h5>
-            @RenderTable(PendingDebt.ToList())
-            
+        <h5>Pending Debt</h5>
+        @RenderTable(PendingDebt.ToList())
+
     </div> 
     <div class="row">
         <h5>Cleared Debt</h5>
@@ -198,6 +198,7 @@
     private List<FineTrack.Database.Debt> LowestDebts = new();
     private List<FineTrack.Database.Debt> PendingDebt = new();
     private List<FineTrack.Database.Debt> ClearedDebt = new();
+    private string abc;
 
     public List<ChartSeries> BarChartSeries = new List<ChartSeries>();
     public string[] BarChartLabels = { "Nov", "Dec", "Jan" }; // Example for three months
