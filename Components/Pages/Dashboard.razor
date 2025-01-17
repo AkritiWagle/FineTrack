@@ -69,7 +69,26 @@
     }
 </style>
 
+
 <div class="container mt-4">
+
+    <div class="row mb-4">
+        <div class="col-3">
+            <label for="startDate">Start Date:</label>
+            <input type="date" id="startDate" class="form-control" @bind="StartDate" />
+        </div>
+        <div class="col-3">
+            <label for="endDate">End Date:</label>
+            <input type="date" id="endDate" class="form-control" @bind="EndDate" />
+        </div>
+        <div class="col-2 d-flex align-items-end">
+            <button class="btn btn-primary w-100" @onclick="ApplyFilter">Apply Filter</button>
+        </div>
+        <div class="col-2 d-flex align-items-end">
+            <button class="btn btn-secondary w-100" @onclick="ResetFilter">Reset Filter</button>
+        </div>
+    </div>
+
     <div class="row">
         <!-- Row A: Cards -->
         <div class="col-6">
@@ -188,6 +207,13 @@
 </div>
 
 @code {
+
+    private DateTime? StartDate { get; set; }
+    private DateTime? EndDate { get; set; }
+    private List<FineTrack.Database.Transaction> FilteredTransactions = new();
+    private List<FineTrack.Database.Debt> FilteredDebts = new();
+
+
     private List<FineTrack.Database.Transaction> HighestInflows = new();
     private List<FineTrack.Database.Transaction> LowestInflows = new();
     private List<FineTrack.Database.Transaction> HighestOutflows = new();
