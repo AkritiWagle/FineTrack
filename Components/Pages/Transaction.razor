@@ -1,4 +1,5 @@
 ﻿@page "/Transaction"
+@inject FineTrack.Services.UserSessionService UserSessionService
 
 @inject FineTrack.Database.ApplicationDbContext DbContext
 @inject FineTrack.Services.BalanceService BalanceService
@@ -15,7 +16,7 @@
                 <option value="">-- All --</option>
                 @foreach (var type in transactionTypes)
                 {
-                        <option value="@type">@type</option>
+                    <option value="@type">@type</option>
                 }
             </select>
         </div>
@@ -25,7 +26,7 @@
                 <option value="">-- All --</option>
                 @foreach (var category in transactionCategories)
                 {
-                        <option value="@category">@category</option>
+                    <option value="@category">@category</option>
                 }
             </select>
         </div>
@@ -46,53 +47,54 @@
 
 @if (filteredTransactions == null)
 {
-        <p>Loading...</p>
+    <p>Loading...</p>
 }
 else if (filteredTransactions.Count == 0)
 {
-        <p>No transactions found.</p>
+    <p>No transactions found.</p>
 }
 else
 {
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>TransactionID</th>
-                    <th>Transaction Type</th>
-                    <th>
-                        Amount
-                        <button class="btn btn-link btn-sm" @onclick="ToggleAmountSortOrder">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>TransactionID</th>
+                <th>Transaction Type</th>
+                <th>
+                    Amount
+                    <button class="btn btn-link btn-sm" @onclick="ToggleAmountSortOrder">
                         @((isAmountSortAscending ? "↑" : "↓"))
-                        </button>
-                    </th>
-                    <th>Category</th>
-                    <th>
-                        Transaction Date
-                        <button class="btn btn-link btn-sm" @onclick="ToggleDateSortOrder">
+                    </button>
+                </th>
+                <th>Category</th>
+                <th>
+                    Transaction Date
+                    <button class="btn btn-link btn-sm" @onclick="ToggleDateSortOrder">
                         @((isDateSortAscending ? "↑" : "↓"))
-                        </button>
-                    </th>
-                    <th>Remarks</th>
-                </tr>
-            </thead>
-            <tbody>
+                    </button>
+                </th>
+                <th>Remarks</th>
+            </tr>
+        </thead>
+        <tbody>
             @foreach (var transaction in filteredTransactions)
             {
-                        <tr>
-                            <td>@transaction.TransactionId</td>
-                            <td>@transaction.TransactionType</td>
-                            <td>@transaction.TransactionAmount.ToString("C")</td>
-                            <td>@transaction.TransactionSource</td>
-                            <td>@transaction.TransactionDate.ToString("yyyy-MM-dd")</td>
-                            <td>@transaction.Remarks</td>
-                        </tr>
+                <tr>
+                    <td>@transaction.TransactionId</td>
+                    <td>@transaction.TransactionType</td>
+                    <td>@transaction.TransactionAmount.ToString("C")</td>
+                    <td>@transaction.TransactionSource</td>
+                    <td>@transaction.TransactionDate.ToString("yyyy-MM-dd")</td>
+                    <td>@transaction.Remarks</td>
+                </tr>
             }
-            </tbody>
-        </table>
+        </tbody>
+    </table>
 }
 
 @code {
     private List<FineTrack.Database.Transaction> transactions;
+    private List<FineTrack.Database.Transaction> allTransactions;
     private List<FineTrack.Database.Transaction> filteredTransactions;
 
     private List<string> transactionTypes = new List<string>();
@@ -110,7 +112,8 @@ else
     {
         try
         {
-            transactions = await DbContext.ReadAllAsync();
+            allTransactions = await DbContext.ReadAllAsync();
+            transactions = allTransactions.Where(t => t.UserId == UserSessionService.CurrentUser.UserId).ToList();
             filteredTransactions = transactions; // Initialize filtered list
 
             // Populate dropdowns

@@ -80,7 +80,7 @@
     {
         errorMessage = "";
         categories = DbContext.GetTableRows<TransactionCategoryTable>("TransactionCategoryTable")
-            .Where(c => c.TypeOfTransaction == selectedType)
+            .Where(c => c.TypeOfTransaction == selectedType && c.UserId == UserSessionService.CurrentUser.UserId)
             .ToList();
     }
 

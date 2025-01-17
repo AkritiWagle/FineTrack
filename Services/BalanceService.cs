@@ -11,6 +11,8 @@ namespace FineTrack.Services
     public class BalanceService
     {
         private readonly ApplicationDbContext _dbContext;
+        private readonly UserSessionService _userSessionService; 
+
         // Exposed properties
         public decimal AvailableBalance { get; private set; } = 0;
         public decimal TotalInflows { get; private set; } = 0;
@@ -26,15 +28,29 @@ namespace FineTrack.Services
 
 
 
-        public BalanceService(ApplicationDbContext dbContext)
+        public BalanceService(ApplicationDbContext dbContext , UserSessionService userSessionService)
         {
             _dbContext = dbContext;
+            _userSessionService = userSessionService;
         }
 
         public async Task UpdateAvailableBalanceAsync()
         {
-            var transactions = await _dbContext.Transactions.ToListAsync();
-            var Debts = await _dbContext.Debts.ToListAsync();
+            var currentUserId = _userSessionService.CurrentUser.UserId;
+
+            var allTransactions = await _dbContext.Transactions.ToListAsync();
+            var allDebts = await _dbContext.Debts.ToListAsync();
+
+            //var transactions = alltransactionsToListAsync();
+            var transactions = allTransactions.Where(t => t.UserId == currentUserId).ToList();
+
+            var Debts = allDebts.Where(t => t.UserId == currentUserId).ToList();
+
+            //var Debts = await _dbContext.Debts.ToListAsync();
+
+            //var transactions = await _dbContext.Transactions.ToListAsync();
+            //var Debts = await _dbContext.Debts.ToListAsync();
+
             // Calculate AvailableBalance using the formula
             var totalIncome = transactions
                 .Where(t => t.TransactionType == "Income")
@@ -63,14 +79,17 @@ namespace FineTrack.Services
 
             TotalClearedDebt = totalClearedDebt;
             TotalDebt = TotalPendingDebt + TotalClearedDebt;
-            //var debt = 0; // Replace with actual debt calculation when available
             AvailableBalance = totalIncome + totalPendingDebt - totalExpense;
         }
 
         // Method to update the categories
         public async Task UpdateTransactionCategoriesAsync()
         {
-            var categories = await _dbContext.TransactionCategories.ToListAsync();
+            var currentUserId = _userSessionService.CurrentUser.UserId;
+
+            var allCategories = await _dbContext.TransactionCategories.ToListAsync();
+            var categories = allCategories.Where(t => t.UserId == currentUserId).ToList();
+
 
             // Clear existing categories before adding new ones
             IncomeCategories.Clear();

@@ -107,6 +107,8 @@ else
 
 @code {
     private List<FineTrack.Database.Debt> Debts;
+    private List<FineTrack.Database.Debt> allDebts;
+
     private List<FineTrack.Database.Debt> filteredDebts;
     private bool isSortingByDueDateAscending = true;
     private bool isSortingByDebtDateAscending = true;
@@ -122,7 +124,10 @@ else
     {
         try
         {
-            Debts = await DbContext.ReadAllDebtAsync();
+            allDebts = await DbContext.ReadAllDebtAsync();
+            Debts = allDebts.Where(t => t.UserId == UserSessionService.CurrentUser.UserId).ToList();
+
+            // Debts = await DbContext.ReadAllDebtAsync();
             filteredDebts = new List<FineTrack.Database.Debt>(Debts);
             SortByDebtDate(); // Default sorting
         }

@@ -4,18 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SQLite;
-
+using FineTrack.Services;
 namespace FineTrack.Database
 {
     public class ApplicationDbContext
-    {
+    {     
         public SQLiteAsyncConnection _dbConnection;
-
+    
         //This is the Applcation Database  
         public readonly static string nameSpace = "FineTrack.Database.";
 
         public const string DatabaseFileName = "FineTrack.Database.db3";
-
+        
         public static string databasePath => Path.Combine(FileSystem.AppDataDirectory, DatabaseFileName);
 
         public const SQLite.SQLiteOpenFlags Flags =
@@ -39,6 +39,8 @@ namespace FineTrack.Database
 
             }
         }
+
+        //public int currentUserId = UserSessionService.Instance.CurrentUser?.UserId ?? 1;
 
         // This is a task for insertion to db table
         public async Task<int>CreateAsync<TEntity>(TEntity entity) where TEntity : class
@@ -86,14 +88,43 @@ namespace FineTrack.Database
             string query = "SELECT * FROM " + tableName + " WHERE " +column+ "='" +value+"'";
             return _dbConnection.QueryAsync(map, query, obj).Result.FirstOrDefault();
         }
+        //public async Task<List<Transaction>> ReadAllAsync()
+        //{
+        //    var currentUserId = UserSessionService.Instance?.GetCurrentUser() ?? 1;
+
+        //    return await _dbConnection.Table<Transaction>()
+        //        .Where(t => t.UserId == currentUserId)
+        //        .ToListAsync();
+        //}
+
+        //public async Task<List<Debt>> ReadAllDebtAsync()
+        //{
+        //    var currentUserId = UserSessionService.Instance?.GetCurrentUser() ?? 1;
+        //    Console.WriteLine(currentUserId);
+        //    return await _dbConnection.Table<Debt>()
+        //        .Where(t => t.UserId == currentUserId)
+        //        .ToListAsync();
+        //}
+
+
+        // This method retrieves all transactions filtered by current user
         public async Task<List<Transaction>> ReadAllAsync()
         {
-            return await _dbConnection.Table<Transaction>().ToListAsync();
+           
+            // Return transactions filtered by the current user's ID
+            return await _dbConnection.Table<Transaction>()
+                //.Where(t => t.UserId == currentUserId)
+                .ToListAsync();
         }
 
+        // This method retrieves all debts filtered by current user
         public async Task<List<Debt>> ReadAllDebtAsync()
         {
-            return await _dbConnection.Table<Debt>().ToListAsync();
+
+            // Return debts filtered by the current user's ID
+            return await _dbConnection.Table<Debt>()
+                //.Where(d => d.UserId == currentUserId)
+                .ToListAsync();
         }
 
         // Add a property to access the Transaction table

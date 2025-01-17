@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FineTrack.Database;
-using Microsoft.EntityFrameworkCore;
 
 namespace FineTrack.Services
 {
@@ -16,20 +15,19 @@ namespace FineTrack.Services
         {
             CurrentUser = user;
         }
+        public int  GetCurrentUser()
+        {
+            return CurrentUser?.UserId ?? 1;
+        }
 
         public bool IsLoggedIn()
         {
             return CurrentUser != null;
-            
         }
 
         public void Logout()
         {
             CurrentUser = null;
         }
-
-
-        //this function should update the CurrentUser
-       
     }
 }

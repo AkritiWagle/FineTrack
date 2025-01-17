@@ -206,8 +206,15 @@
         await BalanceService.UpdateAvailableBalanceAsync();
         await BalanceService.UpdateTransactionCategoriesAsync();
 
-        var transactions = await DbContext.Transactions.ToListAsync();
-        var debts = await DbContext.Debts.ToListAsync();
+        var allTransactions = await DbContext.Transactions.ToListAsync();
+        var allDebts = await DbContext.Debts.ToListAsync();
+
+        // var transactions = await DbContext.Transactions.ToListAsync();
+        var transactions = allTransactions.Where(t => t.UserId == UserSessionService.CurrentUser.UserId).ToList();
+
+        // var debts = await DbContext.Debts.ToListAsync();
+        var debts = allDebts.Where(t => t.UserId == UserSessionService.CurrentUser.UserId).ToList();
+
 
         HighestInflows = transactions.Where(t => t.TransactionType == "Income").OrderByDescending(t => t.TransactionAmount).Take(3).ToList();
         LowestInflows = transactions.Where(t => t.TransactionType == "Income").OrderBy(t => t.TransactionAmount).Take(3).ToList();
