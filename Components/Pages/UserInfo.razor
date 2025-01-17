@@ -3,16 +3,29 @@
 
 @inject FineTrack.Services.UserSessionService UserSessionService
 
-
+<center>
 <h3>UserInfo</h3>
-@UserName  IS Username<br/>
-@UserId  IS UserId
+	<br />
+
+
+<h5>
+	User Id : @UserId
+</h5>
+
+<h5>
+	User Name : @UserName
+</h5>
+
+<h5>
+	Currency: @PreferredCurrency  
+</h5>
+
 <br />
 
-@PreferredCurrency  IS PreferredCurrency
 <br />
 
-<button class="btn btn-primary" @onclick="LogoutUser">Logout</button>
+<button class="btn btn-warning" @onclick="LogoutUser">Logout</button>
+</center>
 
 @code {
 	public string UserName { get; set; } 

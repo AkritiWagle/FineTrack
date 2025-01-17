@@ -7,49 +7,75 @@
 <h3>Transactions</h3>
 <p>Total Inflow/Outflow Transactions: @BalanceService.TransactionCount</p>
 
-<div class="filters mb-4">
-    <h5>Filters</h5>
-    <div class="d-flex align-items-end">
-        <div class="form-group mr-3">
-            <label for="transactionType">Transaction Type:</label>
-            <select id="transactionType" class="form-control" @bind="filterTransactionType">
-                <option value="">-- All --</option>
-                @foreach (var type in transactionTypes)
-                {
-                    <option value="@type">@type</option>
-                }
-            </select>
-        </div>
-        <div class="form-group mr-3">
-            <label for="category">Category:</label>
-            <select id="category" class="form-control" @bind="filterCategory">
-                <option value="">-- All --</option>
-                @foreach (var category in transactionCategories)
-                {
-                    <option value="@category">@category</option>
-                }
-            </select>
-        </div>
-        <div class="form-group mr-3">
-            <label for="startDate">Start Date:</label>
-            <input id="startDate" type="date" @bind="filterStartDate" class="form-control" />
-        </div>
-        <div class="form-group mr-3">
-            <label for="endDate">End Date:</label>
-            <input id="endDate" type="date" @bind="filterEndDate" class="form-control" />
-        </div>
+@* <div class="d-flex mb-3"> *@
+@*     <h5>Filters</h5> *@
+@*     <div class="d-flex align-items-end"> *@
+@*         <div class="form-group mr-3"> *@
+@*             <label for="transactionType">Transaction Type:</label> *@
+@*             <select id="transactionType" class="form-control" @bind="filterTransactionType"> *@
+@*                 <option value="">-- All --</option> *@
+@*                 @foreach (var type in transactionTypes) *@
+@*                 { *@
+@*                     <option value="@type">@type</option> *@
+@*                 } *@
+@*             </select> *@
+@*         </div> *@
+@*         <div class="form-group mr-3"> *@
+@*             <label for="category">Category:</label> *@
+@*             <select id="category" class="form-control" @bind="filterCategory"> *@
+@*                 <option value="">-- All --</option> *@
+@*                 @foreach (var category in transactionCategories) *@
+@*                 { *@
+@*                     <option value="@category">@category</option> *@
+@*                 } *@
+@*             </select> *@
+@*         </div> *@
+@*         <div class="form-group mr-3"> *@
+@*             <label for="startDate">Start Date:</label> *@
+@*             <input id="startDate" type="date" @bind="filterStartDate" class="form-control" /> *@
+@*         </div> *@
+@*         <div class="form-group mr-3"> *@
+@*             <label for="endDate">End Date:</label> *@
+@*             <input id="endDate" type="date" @bind="filterEndDate" class="form-control" /> *@
+@*         </div> *@
 
-        <div class="form-group mr-3">
-            <label for="title">Title:</label>
-            <input id="title" type="input" @bind="filterTitle" class="form-control" />
-        </div>
+@*         <div class="form-group mr-3"> *@
+@*             <label for="title">Title:</label> *@
+@*             <input id="title" type="input" @bind="filterTitle" class="form-control" /> *@
+@*         </div> *@
 
-        <div>
-            <button class="btn btn-primary mr-2" @onclick="ApplyFiltersAndSort">Apply Filters</button>
-            <button class="btn btn-secondary" @onclick="ClearFilters">Clear Filters</button>
-        </div>
-    </div>
+@*         <div> *@
+@*             <button class="btn btn-primary mr-2" @onclick="ApplyFiltersAndSort">Apply Filters</button> *@
+@*             <button class="btn btn-secondary" @onclick="ClearFilters">Clear Filters</button> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
+
+<div class="d-flex mb-3">
+    <select class="form-select me-2" @bind="filterTransactionType">
+        <option value="">Filter by Transaction Type</option>
+        @foreach (var type in transactionTypes)
+        {
+            <option value="@type">@type</option>
+        }
+    </select>
+
+    <select class="form-select me-2" @bind="filterCategory">
+        <option value="">Filter by Category</option>
+        @foreach (var category in transactionCategories)
+        {
+            <option value="@category">@category</option>
+        }
+    </select>
+
+    <input type="date" class="form-control me-2" @bind="filterStartDate" placeholder="Start Date" />
+    <input type="date" class="form-control me-2" @bind="filterEndDate" placeholder="End Date" />
+    <input type="text" class="form-control me-2" placeholder="Filter by Title" @bind="filterTitle" />
+
+    <button class="btn btn-primary me-2" @onclick="ApplyFiltersAndSort">Apply Filters</button>
+    <button class="btn btn-secondary" @onclick="ClearFilters">Clear Filters</button>
 </div>
+
 
 @if (filteredTransactions == null)
 {
