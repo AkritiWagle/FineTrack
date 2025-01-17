@@ -36,6 +36,8 @@
 
     <input type="date" class="form-control me-2" @bind="filterStartDate" />
     <input type="date" class="form-control me-2" @bind="filterEndDate" />
+    <input type="text" class="form-control me-2" placeholder="Filter by Title" @bind="filterTitle" />
+
 
     <button class="btn btn-primary me-2" @onclick="ApplyFilters">Apply Filters</button>
     <button class="btn btn-secondary" @onclick="ClearFilters">Clear Filters</button>
@@ -85,6 +87,7 @@ else
                     </td>
                     <td>@debt.DebtId</td>
                     <td>@debt.DebtTitle</td>
+
                     <td>@debt.DebtAmount.ToString("C")</td>
                     <td>@debt.DebtCategory</td>
                     <td>@debt.DebtStatus</td>
@@ -118,6 +121,8 @@ else
     private string filterCategory = "";
     private string filterStatus = "";
     private string filterSource = "";
+    private string filterTitle = "";
+
     private DateTime? filterStartDate;
     private DateTime? filterEndDate;
     private string errorMessage;
@@ -217,6 +222,7 @@ else
             .Where(d => string.IsNullOrEmpty(filterCategory) || d.DebtCategory == filterCategory)
             .Where(d => string.IsNullOrEmpty(filterStatus) || d.DebtStatus == filterStatus)
             .Where(d => string.IsNullOrEmpty(filterSource) || d.DebtSource == filterSource)
+            .Where(d => string.IsNullOrEmpty(filterTitle) || d.DebtTitle.Contains(filterTitle, StringComparison.OrdinalIgnoreCase))
             .Where(d => !filterStartDate.HasValue || d.DebtDate >= filterStartDate.Value)
             .Where(d => !filterEndDate.HasValue || d.DebtDate <= filterEndDate.Value)
             .ToList();
@@ -228,6 +234,7 @@ else
         filterCategory = "";
         filterStatus = "";
         filterSource = "";
+        filterTitle = "";
         filterStartDate = null;
         filterEndDate = null;
         filteredDebts = new List<FineTrack.Database.Debt>(Debts);
