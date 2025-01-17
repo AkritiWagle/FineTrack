@@ -38,6 +38,12 @@
             <label for="endDate">End Date:</label>
             <input id="endDate" type="date" @bind="filterEndDate" class="form-control" />
         </div>
+
+        <div class="form-group mr-3">
+            <label for="title">Title:</label>
+            <input id="title" type="input" @bind="filterTitle" class="form-control" />
+        </div>
+
         <div>
             <button class="btn btn-primary mr-2" @onclick="ApplyFiltersAndSort">Apply Filters</button>
             <button class="btn btn-secondary" @onclick="ClearFilters">Clear Filters</button>
@@ -104,6 +110,8 @@ else
 
     private string filterTransactionType;
     private string filterCategory;
+    private string filterTitle;
+
     private DateTime? filterStartDate;
     private DateTime? filterEndDate;
 
@@ -149,6 +157,9 @@ else
             .Where(t => string.IsNullOrEmpty(filterCategory) ||
                         (!string.IsNullOrEmpty(t.TransactionSource) &&
                          t.TransactionSource.Contains(filterCategory, StringComparison.OrdinalIgnoreCase)))
+            .Where(t => string.IsNullOrEmpty(filterTitle) ||
+                    (!string.IsNullOrEmpty(t.TransactionTitle) &&
+                     t.TransactionTitle.Contains(filterTitle, StringComparison.OrdinalIgnoreCase))) // Fixed Title Filtering
             .Where(t => !filterStartDate.HasValue || t.TransactionDate >= filterStartDate.Value)
             .Where(t => !filterEndDate.HasValue || t.TransactionDate <= filterEndDate.Value)
             .ToList();
