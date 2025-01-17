@@ -56,6 +56,7 @@ else
             <tr>
                 <th>Select</th>
                 <th>ID</th>
+                <th>Title</th>
                 <th>Amount</th>
                 <th>Category</th>
                 <th>Status</th>
@@ -83,6 +84,7 @@ else
                         <input type="radio" name="selectedDebt" @onclick="() => SelectDebt(debt)" />
                     </td>
                     <td>@debt.DebtId</td>
+                    <td>@debt.DebtTitle</td>
                     <td>@debt.DebtAmount.ToString("C")</td>
                     <td>@debt.DebtCategory</td>
                     <td>@debt.DebtStatus</td>

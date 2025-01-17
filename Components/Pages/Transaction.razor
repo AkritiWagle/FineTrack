@@ -59,6 +59,7 @@ else
         <thead>
             <tr>
                 <th>TransactionID</th>
+                <th>Title</th>
                 <th>Transaction Type</th>
                 <th>
                     Amount
@@ -81,6 +82,7 @@ else
             {
                 <tr>
                     <td>@transaction.TransactionId</td>
+                    <td>@transaction.TransactionTitle</td>
                     <td>@transaction.TransactionType</td>
                     <td>@transaction.TransactionAmount.ToString("C")</td>
                     <td>@transaction.TransactionSource</td>
